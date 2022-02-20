@@ -20,7 +20,7 @@ data "template_file" "external_gw_userdata" {
     ipCidr  = "${var.vcenter.dvs.portgroup.management.external_gw_ip}/${var.vcenter.dvs.portgroup.management.prefix}"
     ip = var.vcenter.dvs.portgroup.management.external_gw_ip
     defaultGw = var.vcenter.dvs.portgroup.management.gateway
-    ip_data_cidr  = "${var.vcenter.dvs.portgroup.nsx_external.external_gw_ip}/${var.vcenter.dvs.portgroup.nsx_external.prefix}"
+//    ip_data_cidr  = "${var.vcenter.dvs.portgroup.nsx_external.external_gw_ip}/${var.vcenter.dvs.portgroup.nsx_external.prefix}"
     dns      = var.external_gw.dns
     netplanFile = var.external_gw.netplanFile
     privateKey = var.external_gw.private_key_path
@@ -90,7 +90,7 @@ resource "null_resource" "clear_ssh_key_external_gw_locally" {
   }
 }
 
-resource "null_resource" "add_nic_to_client" {
+resource "null_resource" "add_nic_to_external_gw" {
   depends_on = [vsphere_virtual_machine.external_gw]
 
   provisioner "local-exec" {
@@ -103,5 +103,24 @@ resource "null_resource" "add_nic_to_client" {
       export GOVC_INSECURE=true
       /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.network_nsx_external.name}
     EOT
+  }
+}
+
+resource "null_resource" "update_ip_external_gw" {
+  depends_on = [null_resource.add_nic_to_external_gw]
+  count = (var.external_gw.create == true ? 1 : 0)
+
+  connection {
+    host        = var.vcenter.dvs.portgroup.management.external_gw_ip
+    type        = "ssh"
+    agent       = false
+    user        = var.external_gw.username
+    private_key = file(var.external_gw.private_key_path)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo netplan apply"
+    ]
   }
 }

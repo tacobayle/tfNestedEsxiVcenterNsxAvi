@@ -14,10 +14,10 @@ write_files:
       #
       #
       #
-      iface==`ip -o link show | awk -F': ' '{print $2}' | head -2 | tail -1`
-      mac=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -2 | tail -1`
-      ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`
-      macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`
+      iface=`ip -o link show | awk -F': ' '{print $2}' | tail -1`
+      mac=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | tail -1`
+      # ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`
+      # macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`
       hostname=`hostname`
       echo "${ip} $hostname" | sudo tee -a /etc/hosts
       cp ${netplanFile} ${netplanFile}.old
@@ -32,13 +32,13 @@ write_files:
       echo "            gateway4: ${defaultGw}" | sudo tee -a ${netplanFile}
       echo "            nameservers:" | sudo tee -a ${netplanFile}
       echo "              addresses: [${dns}]" | sudo tee -a ${netplanFile}
-      echo "        $ifaceLastName:" | sudo tee -a ${netplanFile}
-      echo "            dhcp4: false" | sudo tee -a ${netplanFile}
-      echo "            addresses: [${ip_data_cidr}]" | sudo tee -a ${netplanFile}
-      echo "            match:" | sudo tee -a ${netplanFile}
-      echo "                macaddress: $macLast" | sudo tee -a ${netplanFile}
-      echo "            set-name: $ifaceLastName" | sudo tee -a ${netplanFile}
-      echo "    version: 2" | sudo tee -a ${netplanFile}
+      #echo "        $ifaceLastName:" | sudo tee -a ${netplanFile}
+      #echo "            dhcp4: false" | sudo tee -a ${netplanFile}
+      #echo "            addresses: [${ip_data_cidr}]" | sudo tee -a ${netplanFile}
+      #echo "            match:" | sudo tee -a ${netplanFile}
+      #echo "                macaddress: $macLast" | sudo tee -a ${netplanFile}
+      #echo "            set-name: $ifaceLastName" | sudo tee -a ${netplanFile}
+      #echo "    version: 2" | sudo tee -a ${netplanFile}
       sudo netplan apply
       echo "cloud init done" | tee /tmp/cloudInitDone.log
     path: /opt/bootstrap.sh
