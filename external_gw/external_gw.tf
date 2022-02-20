@@ -1,4 +1,4 @@
-resource "vsphere_content_library" "library" {
+resource "vsphere_content_library" "library_external_gw" {
   count = (var.external_gw.create == true ? 1 : 0)
   name            = "cl_tf_external_gw"
   storage_backing = [data.vsphere_datastore.datastore.id]
@@ -6,8 +6,8 @@ resource "vsphere_content_library" "library" {
 
 resource "vsphere_content_library_item" "files" {
   count = (var.external_gw.create == true ? 1 : 0)
-  name        = basename(var.vcenter_underlay.cl.file)
-  library_id  = vsphere_content_library.library[0].id
+  name        = basename(var.vcenter_underlay.cl.file_external_gw)
+  library_id  = vsphere_content_library.library_external_gw[0].id
   file_url = var.vcenter_underlay.cl.file_external_gw
 }
 
