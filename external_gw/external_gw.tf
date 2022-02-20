@@ -4,7 +4,7 @@ resource "vsphere_content_library" "library_external_gw" {
   storage_backing = [data.vsphere_datastore.datastore.id]
 }
 
-resource "vsphere_content_library_item" "files" {
+resource "vsphere_content_library_item" "file_external_gw" {
   count = (var.external_gw.create == true ? 1 : 0)
   name        = basename(var.vcenter_underlay.cl.file_external_gw)
   library_id  = vsphere_content_library.library_external_gw[0].id
@@ -58,7 +58,7 @@ resource "vsphere_virtual_machine" "external_gw" {
   }
 
   clone {
-    template_uuid = vsphere_content_library_item.files[0].id
+    template_uuid = vsphere_content_library_item.file_external_gw[0].id
   }
 
   vapp {

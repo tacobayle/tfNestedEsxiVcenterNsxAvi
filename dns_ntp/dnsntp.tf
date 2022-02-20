@@ -4,7 +4,7 @@ resource "vsphere_content_library" "cl_tf_dnsntp" {
   storage_backing = [data.vsphere_datastore.datastore.id]
 }
 
-resource "vsphere_content_library_item" "files" {
+resource "vsphere_content_library_item" "file_dnsntp" {
   count = (var.dns_ntp.create == true ? 1 : 0)
   name        = basename(var.vcenter_underlay.cl.file)
   library_id  = vsphere_content_library.cl_tf_dnsntp[0].id
@@ -59,7 +59,7 @@ resource "vsphere_virtual_machine" "dns_ntp" {
   }
 
   clone {
-    template_uuid = vsphere_content_library_item.files[0].id
+    template_uuid = vsphere_content_library_item.file_dnsntp[0].id
   }
 
   vapp {
