@@ -58,7 +58,7 @@ fi
 #
 # Build of an external GW server on the underlay infrastructure
 #
-if [[ $(jq -c -r .gw.create $jsonFile) == true ]] ; then
+if [[ $(jq -c -r .external_gw.create $jsonFile) == true ]] ; then
   tf_init_apply "Build of an external GW server on the underlay infrastructure - This should take less than 5 minutes" external_gw ../logs/external_gw.stdout ../logs/external_gw.errors ../$jsonFile
 fi
 #
