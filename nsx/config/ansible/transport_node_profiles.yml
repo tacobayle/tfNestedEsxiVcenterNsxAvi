@@ -28,7 +28,7 @@
 - name: build the variable host_switches (for host switch overlay)
   set_fact:
     host_switches: "{{ host_switches | default([]) + [{'host_switch_profiles': [{'name': item.uplink_profile_name, 'type': 'UplinkHostSwitchProfile'}], 'host_switch_name': item.name, 'host_switch_mode': item.mode, 'host_switch_type': item.type, 'uplinks': item.uplinks, 'ip_assignment_spec': {'resource_type': 'StaticIpPoolSpec', 'ip_pool_name': item.ip_pool_name}, 'transport_zone_endpoints': item.transport_zones}] }}"
-  loop: "{{ outer_item.switch }}"
+  loop: "{{ outer_item.switches }}"
   when:
     - item.ip_pool_name is defined
 
@@ -39,7 +39,7 @@
 - name: build the variable host_switches (for host switch external)
   set_fact:
     host_switches: "{{ host_switches | default([]) + [{'host_switch_profiles': [{'name': item.uplink_profile_name, 'type': 'UplinkHostSwitchProfile'}], 'host_switch_name': item.name, 'host_switch_mode': item.mode, 'host_switch_type': item.type, 'uplinks': item.uplinks, 'transport_zone_endpoints': item.transport_zones}] }}"
-  loop: "{{ outer_item.switch }}"
+  loop: "{{ outer_item.switches }}"
   when:
     - item.ip_pool_name is not defined
 

@@ -261,19 +261,19 @@
         {
           "name": "segment1",
           "vlan": "200, 250, 260",
-          "transport_zone": "tz2",
+          "transport_zone": "tz_vlan",
           "description": "Segment configured as Trunk, used for NSX Edge Nodes external connectivity"
         },
         {
           "name": "segment2",
           "vlan": "200, 250, 260",
-          "transport_zone": "tz2",
+          "transport_zone": "tz_vlan",
           "description": "Segment configured as Trunk, used for NSX Edge Nodes external connectivity"
         },
         {
           "name": "external_segment",
           "vlan": "1-4092",
-          "transport_zone": "tz2",
+          "transport_zone": "tz_vlan",
           "description": "Segment configured as Trunk, used for NSX Edge Nodes external connectivity"
         }
       ],
@@ -281,12 +281,12 @@
         {
           "name": "tnp-cluster",
           "description": "descr1",
-          "switch": [
+          "switches": [
             {
               "name": "nsx-overlay-vds",
               "mode": "STANDARD",
               "type": "VDS",
-              "uplink_profile_name": "uplink_profile_default",
+              "uplink_profile_name": "uplink-profile-default",
               "ip_pool_name": "ip_pool_tep",
               "uplinks": [
                 {
@@ -295,14 +295,16 @@
                 }
               ],
               "transport_zones": [
-                "tz_overlay"
+                {
+                  "transport_zone_name": "tz_overlay"
+                }
               ]
             },
             {
               "name": "nsx-external-vds",
               "mode": "STANDARD",
               "type": "VDS",
-              "uplink_profile_name": "uplink_profile_default",
+              "uplink_profile_name": "uplink-profile-default",
               "uplinks": [
                 {
                   "uplink_name": "uplink-1",
@@ -310,7 +312,9 @@
                 }
               ],
               "transport_zones": [
-                "tz_vlan"
+                {
+                  "transport_zone_name": "tz_vlan"
+                }
               ]
             }
           ]

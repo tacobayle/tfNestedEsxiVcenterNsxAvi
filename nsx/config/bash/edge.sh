@@ -52,6 +52,8 @@ do
   fi
 done
 echo $compute_id
+
+
 for edge_index in $(seq 1 $(jq -r .nsx.config.edge_node.count $jsonFile))
 do
   name=$(jq -r .nsx.config.edge_node.basename $jsonFile)$edge_index
