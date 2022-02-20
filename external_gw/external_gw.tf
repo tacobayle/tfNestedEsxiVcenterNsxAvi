@@ -135,7 +135,7 @@ resource "null_resource" "update_ip_external_gw" {
       "echo \"            gateway4: ${var.vcenter.dvs.portgroup.management.gateway}\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            nameservers:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"              addresses: [${var.external_gw.dns}]\" | sudo tee -a ${var.external_gw.netplanFile}",
-      "echo \"        $ifaceLastName:\" | sudo tee -a ${var.external_gw.netplanFile}"
+      "echo \"        $ifaceLastName:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            dhcp4: false\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            addresses: [${var.vcenter.dvs.portgroup.nsx_external.external_gw_ip}/${var.vcenter.dvs.portgroup.nsx_external.prefix}]\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
