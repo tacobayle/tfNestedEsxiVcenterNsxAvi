@@ -9,7 +9,7 @@
     "cl": {
       "name": "ubuntu",
       "file": "/home/ubuntu/bin/bionic-server-cloudimg-amd64.ova",
-      "file_external_gw": "/home/ubuntu/bin/focal-server-cloudimg-amd64.ova"
+      "file_external_gw": "/home/ubuntu/bin/bionic-server-cloudimg-amd64.ova"
     },
     "networks": {
       "management": {
