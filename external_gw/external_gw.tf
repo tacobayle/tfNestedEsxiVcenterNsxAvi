@@ -124,7 +124,25 @@ resource "null_resource" "update_ip_external_gw" {
       "mac=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -2 | tail -1`",
       "ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`",
       "macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`",
-      "echo \"network:\" | sudo tee ${var.external_gw.netplanFile}"
+      "echo \"network:\" | sudo tee ${var.external_gw.netplanFile}",
+      "echo \"    ethernets:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"        $iface:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            dhcp4: false\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            addresses: [${var.vcenter.dvs.portgroup.management.external_gw_ip}/${var.vcenter.dvs.portgroup.management.prefix}]\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"                macaddress: $mac\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            set-name: $iface\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            gateway4: ${var.vcenter.dvs.portgroup.management.gateway}\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            nameservers:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"              addresses: [${var.external_gw.dns}]\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"        $ifaceLastName:\" | sudo tee -a ${var.external_gw.netplanFile}"
+      "echo \"            dhcp4: false\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            addresses: [${var.vcenter.dvs.portgroup.nsx_external.external_gw_ip}/${var.vcenter.dvs.portgroup.nsx_external.prefix}]\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"                macaddress: $macLast\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            set-name: $ifaceLastName\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"    version: 2\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "sudo netplan apply"
     ]
   }
 }
