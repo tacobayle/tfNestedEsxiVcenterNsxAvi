@@ -30,13 +30,7 @@ write_files:
       echo "            gateway4: ${defaultGw}" | sudo tee -a ${netplanFile}
       echo "            nameservers:" | sudo tee -a ${netplanFile}
       echo "              addresses: [${dns}]" | sudo tee -a ${netplanFile}
-      #echo "        $ifaceLastName:" | sudo tee -a ${netplanFile}
-      #echo "            dhcp4: false" | sudo tee -a ${netplanFile}
-      #echo "            addresses: [${ip_data_cidr}]" | sudo tee -a ${netplanFile}
-      #echo "            match:" | sudo tee -a ${netplanFile}
-      #echo "                macaddress: $macLast" | sudo tee -a ${netplanFile}
-      #echo "            set-name: $ifaceLastName" | sudo tee -a ${netplanFile}
-      #echo "    version: 2" | sudo tee -a ${netplanFile}
+      echo "    version: 2" | sudo tee -a ${netplanFile}
       sudo netplan apply
       echo "cloud init done" | tee /tmp/cloudInitDone.log
     path: /opt/bootstrap.sh

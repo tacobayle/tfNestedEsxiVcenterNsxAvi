@@ -120,7 +120,11 @@ resource "null_resource" "update_ip_external_gw" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo netplan apply"
+      "iface=`ip -o link show | awk -F': ' '{print $2}' | head -2 | tail -1`",
+      "mac=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -2 | tail -1`",
+      "ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`",
+      "macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`",
+      "echo \"network:\" | sudo tee ${var.external_gw.netplanFile}"
     ]
   }
 }
