@@ -22,7 +22,7 @@ data "vsphere_network" "vcenter_underlay_network_mgmt" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-data "vsphere_network" "vcenter_underlay_network_external" {
-  name = var.vcenter_underlay.network_nsx_external.name
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
+//data "vsphere_network" "vcenter_underlay_network_external" {
+//  name = var.vcenter_underlay.network_nsx_external.name
+//  datacenter_id = data.vsphere_datacenter.dc.id
+//}

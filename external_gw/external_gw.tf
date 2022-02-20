@@ -38,9 +38,9 @@ resource "vsphere_virtual_machine" "external_gw" {
     network_id = data.vsphere_network.vcenter_underlay_network_mgmt.id
   }
 
-  network_interface {
-    network_id = data.vsphere_network.vcenter_underlay_network_external.id
-  }
+//  network_interface {
+//    network_id = data.vsphere_network.vcenter_underlay_network_external.id
+//  }
 
   num_cpus = var.external_gw.cpu
   memory = var.external_gw.memory
@@ -90,18 +90,18 @@ resource "null_resource" "clear_ssh_key_external_gw_locally" {
   }
 }
 
-//resource "null_resource" "add_nic_to_client" {
-//  depends_on = [vsphere_virtual_machine.external_gw]
-//
-//  provisioner "local-exec" {
-//    command = <<-EOT
-//      export GOVC_USERNAME=${var.vsphere_username}
-//      export GOVC_PASSWORD=${var.vsphere_password}
-//      export GOVC_DATACENTER=${var.vcenter_underlay.dc}
-//      export GOVC_URL=${var.vcenter_underlay.server}
-//      export GOVC_CLUSTER=${var.vcenter_underlay.cluster}
-//      export GOVC_INSECURE=true
-//      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.networks.management.name}
-//    EOT
-//  }
-//}
+resource "null_resource" "add_nic_to_client" {
+  depends_on = [vsphere_virtual_machine.external_gw]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      export GOVC_USERNAME=${var.vsphere_username}
+      export GOVC_PASSWORD=${var.vsphere_password}
+      export GOVC_DATACENTER=${var.vcenter_underlay.dc}
+      export GOVC_URL=${var.vcenter_underlay.server}
+      export GOVC_CLUSTER=${var.vcenter_underlay.cluster}
+      export GOVC_INSECURE=true
+      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.network_nsx_external.name}
+    EOT
+  }
+}
