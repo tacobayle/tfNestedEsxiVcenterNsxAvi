@@ -9,7 +9,7 @@ resource "dns_a_record_set" "esxi" {
 
 resource "dns_a_record_set" "nsx" {
   depends_on = [vsphere_virtual_machine.dns_ntp]
-  count = var.dns_ntp.create == true && var.nsx.create == true ? 1 : 0
+  count = var.dns_ntp.create == true && var.nsx.manager.create == true ? 1 : 0
   zone  = "${var.dns.domain}."
   name  = "${var.nsx.manager.basename}"
   addresses = [var.vcenter.dvs.portgroup.management.nsx_ip]
@@ -25,7 +25,7 @@ resource "dns_cname_record" "nsx_cname" {
 
 resource "dns_a_record_set" "avi" {
   depends_on = [vsphere_virtual_machine.dns_ntp]
-  count = var.dns_ntp.create == true && var.avi.create == true ? 1 : 0
+  count = var.dns_ntp.create == true && var.avi.controller.create == true ? 1 : 0
   zone  = "${var.dns.domain}."
   name  = "${var.avi.controller.basename}"
   addresses = [var.vcenter.dvs.portgroup.management.avi_ips[0]]
