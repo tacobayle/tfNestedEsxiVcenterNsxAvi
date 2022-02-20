@@ -46,7 +46,7 @@ resource "vsphere_virtual_machine" "dns_ntp" {
   num_cpus = var.dns_ntp.cpu
   memory = var.dns_ntp.memory
   wait_for_guest_net_timeout = var.dns_ntp.wait_for_guest_net_timeout
-  guest_id = var.dns_ntp.name
+  guest_id = "ubuntu64Guest"
 
   disk {
     size             = var.dns_ntp.disk

@@ -38,14 +38,14 @@ resource "vsphere_virtual_machine" "external_gw" {
     network_id = data.vsphere_network.vcenter_underlay_network_mgmt.id
   }
 
-  network_interface {
-    network_id = data.vsphere_network.vcenter_underlay_network_external.id
-  }
+//  network_interface {
+//    network_id = data.vsphere_network.vcenter_underlay_network_external.id
+//  }
 
   num_cpus = var.external_gw.cpu
   memory = var.external_gw.memory
   wait_for_guest_net_timeout = var.external_gw.wait_for_guest_net_timeout
-  guest_id = var.external_gw.name
+  guest_id = "ubuntu64Guest"
 
   disk {
     size             = var.external_gw.disk
