@@ -18,6 +18,16 @@ if [[ $(jq -c -r .dns_ntp.create $jsonFile) == true ]] ; then
 fi
 echo "--------------------------------------------------------------------------------------------------------------------"
 #
+# Destroy External GW server on the underlay infrastructure
+#
+echo "Destroy DNS/NTP server on the underlay infrastructure"
+if [[ $(jq -c -r .external_gw.create $jsonFile) == true ]] ; then
+  cd external_gw
+  terraform destroy -auto-approve -var-file=../$jsonFile
+  cd ..
+fi
+echo "--------------------------------------------------------------------------------------------------------------------"
+#
 # Destroy the nested ESXi/vCenter infrastructure
 #
 echo "Destroy the nested ESXi/vCenter infrastructure"
