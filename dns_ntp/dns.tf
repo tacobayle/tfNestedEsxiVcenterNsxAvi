@@ -17,6 +17,7 @@ resource "dns_a_record_set" "nsx" {
 }
 
 resource "dns_cname_record" "nsx_cname" {
+  depends_on = [dns_a_record_set.nsx, vsphere_virtual_machine.dns_ntp]
   zone  = "${var.dns.domain}."
   name  = "nsx"
   cname = "${var.nsx.manager.basename}.${var.dns.domain}."
@@ -33,6 +34,7 @@ resource "dns_a_record_set" "avi" {
 }
 
 resource "dns_cname_record" "avi_cname" {
+  depends_on = [dns_a_record_set.avi, vsphere_virtual_machine.dns_ntp]
   zone  = "${var.dns.domain}."
   name  = "avi"
   cname = "${var.avi.controller.basename}.${var.dns.domain}."
@@ -58,6 +60,7 @@ resource "dns_a_record_set" "vcenter" {
 }
 
 resource "dns_cname_record" "vcenter_cname" {
+  depends_on = [dns_a_record_set.vcenter, vsphere_virtual_machine.dns_ntp]
   zone  = "${var.dns.domain}."
   name  = "vcenter"
   cname = "${var.vcenter.name}.${var.dns.domain}."
