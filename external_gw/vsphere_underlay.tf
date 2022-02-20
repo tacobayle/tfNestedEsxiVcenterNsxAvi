@@ -23,6 +23,6 @@ data "vsphere_network" "vcenter_underlay_network_mgmt" {
 }
 
 data "vsphere_network" "vcenter_underlay_network_external" {
-  name = var.vcenter_underlay.networks.management.name
+  name = var.vcenter_underlay.networks.network_nsx_external.name
   datacenter_id = data.vsphere_datacenter.dc.id
 }

@@ -1,4 +1,6 @@
 #!/bin/bash
+type terraform >/dev/null 2>&1 || { echo >&2 "terraform is not installed - please visit: https://learn.hashicorp.com/tutorials/terraform/install-cli to install it - Aborting." ; exit 255; }
+type jq >/dev/null 2>&1 || { echo >&2 "jq is not installed - please install it - Aborting." ; exit 255; }
 #
 # Script to run before TF
 #
@@ -6,7 +8,7 @@ if [ -f "variables.json" ]; then
   jsonFile="variables.json"
 else
   echo "variables.json file not found!!"
-  exit 1
+  exit 255
 fi
 #
 # Prerequisites to be added
