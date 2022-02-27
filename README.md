@@ -2,8 +2,7 @@
 
 ## Goal
 
-This Infrastructure as code will deploy nested ESXi/vCenter on the top of vCenter environment.
-optionally, it can deploy NSX-T and Avi.
+This Infrastructure as code will deploy a nested ESXi/vCenter/NSXT/Avi (on the top of vCenter environment).
 
 ## Use cases
 

@@ -94,12 +94,6 @@ if [[ $(jq -c -r .nsx.config.create $jsonFile) == true ]] ; then
   tf_init_apply "Build of the config of NSX-T" nsx/config ../../logs/tf_nsx_config.stdout ../../logs/tf_nsx_config.errors ../../$jsonFile
 fi
 #
-# Build of the Avi Nested Networks
-#
-if [[ $(jq -c -r .avi.networks.create $jsonFile) == true ]] ; then
-  tf_init_apply "Build of Avi Nested Networks - This should take less than a minute" avi/networks ../../logs/tf_avi_networks.stdout ../../logs/tf_avi_networks.errors ../../$jsonFile
-fi
-#
 # Build of the Nested Avi Controllers
 #
 if [[ $(jq -c -r .avi.controller.create $jsonFile) == true ]] || [[ $(jq -c -r .avi.content_library.create $jsonFile) == true ]] ; then

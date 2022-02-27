@@ -29,24 +29,6 @@ data "vsphere_network" "esxi_network" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-data "vsphere_network" "network_avi_mgmt" {
-  count = (var.vcenter.dvs.single_vds == false && var.avi.networks.create == true ? 1 : 0)
-  name = var.vcenter_underlay.network_avi_mgmt.name
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_network" "network_avi_vip" {
-  count = (var.vcenter.dvs.single_vds == false && var.avi.networks.create == true ? 1 : 0)
-  name = var.vcenter_underlay.network_avi_vip.name
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_network" "network_avi_backend" {
-  count = (var.vcenter.dvs.single_vds == false && var.avi.networks.create == true ? 1 : 0)
-  name = var.vcenter_underlay.network_avi_backend.name
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
 data "vsphere_network" "vcenter_underlay_network_mgmt" {
   count = (var.vcenter.dvs.single_vds == false ? 1 : 0)
   name = var.vcenter_underlay.networks.management.name

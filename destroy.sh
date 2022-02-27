@@ -17,9 +17,6 @@ cd ../..
 cd nsx/config
 rm -f terraform.tfstate
 cd ../..
-cd avi/networks
-rm -f terraform.tfstate
-cd ../..
 cd avi/config
 rm -f terraform.tfstate
 cd ../..
