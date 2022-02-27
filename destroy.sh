@@ -13,16 +13,16 @@ fi
 echo "Delete terraform.tfstate files"
 cd nsx/networks
 rm -f terraform.tfstate
-cd ..
+cd ../..
 cd nsx/config
 rm -f terraform.tfstate
-cd ..
+cd ../..
 cd avi/networks
 rm -f terraform.tfstate
-cd ..
+cd ../..
 cd avi/config
 rm -f terraform.tfstate
-cd ..
+cd ../..
 echo "--------------------------------------------------------------------------------------------------------------------"
 #
 # Destroy DNS/NTP server on the underlay infrastructure

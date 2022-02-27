@@ -101,7 +101,7 @@ resource "null_resource" "add_nic_to_gw_network_nsx_external" {
       export GOVC_URL=${var.vcenter_underlay.server}
       export GOVC_CLUSTER=${var.vcenter_underlay.cluster}
       export GOVC_INSECURE=true
-      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.network_nsx_external.name}
+      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net "${var.vcenter_underlay.network_nsx_external.name}"
     EOT
   }
 }
@@ -117,7 +117,7 @@ resource "null_resource" "add_nic_to_gw_network_nsx_overlay" {
       export GOVC_URL=${var.vcenter_underlay.server}
       export GOVC_CLUSTER=${var.vcenter_underlay.cluster}
       export GOVC_INSECURE=true
-      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.network_nsx_overlay.name}
+      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net "${var.vcenter_underlay.network_nsx_overlay.name}"
     EOT
   }
 }
@@ -133,7 +133,7 @@ resource "null_resource" "add_nic_to_gw_network_nsx_overlay_edge" {
       export GOVC_URL=${var.vcenter_underlay.server}
       export GOVC_CLUSTER=${var.vcenter_underlay.cluster}
       export GOVC_INSECURE=true
-      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.network_nsx_overlay_edge.name}
+      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net "${var.vcenter_underlay.network_nsx_overlay_edge.name}"
     EOT
   }
 }

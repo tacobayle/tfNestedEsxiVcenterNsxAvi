@@ -34,14 +34,14 @@
     "network_avi_backend": {
       "name": "vxw-dvs-34-virtualwire-123-sid-1080122-sof2-01-vc08-avi-dev119"
       },
-    "network_nsx_overlay": {
+    "network_nsx_external": {
       "name": "vxw-dvs-34-virtualwire-124-sid-1080123-sof2-01-vc08-avi-dev120"
       },
-    "network_nsx_overlay_edge": {
+    "network_nsx_overlay": {
       "name": "vxw-dvs-34-virtualwire-125-sid-1080124-sof2-01-vc08-avi-dev121"
-    },
-    "network_nsx_external": {
-      "name": "vxw-dvs-34-virtualwire-125-sid-1080124-sof2-01-vc08-avi-dev122"
+      },
+    "network_nsx_overlay_edge": {
+      "name": "vxw-dvs-34-virtualwire-126-sid-1080125-sof2-01-vc08-avi-dev122"
       }
     },
   "dns": {
