@@ -8,6 +8,23 @@ else
   exit 1
 fi
 #
+# Delete terraform.tfstate files
+#
+echo "Delete terraform.tfstate files"
+cd nsx/networks
+rm -f terraform.tfstate
+cd ..
+cd nsx/config
+rm -f terraform.tfstate
+cd ..
+cd avi/networks
+rm -f terraform.tfstate
+cd ..
+cd avi/config
+rm -f terraform.tfstate
+cd ..
+echo "--------------------------------------------------------------------------------------------------------------------"
+#
 # Destroy DNS/NTP server on the underlay infrastructure
 #
 echo "Destroy DNS/NTP server on the underlay infrastructure"

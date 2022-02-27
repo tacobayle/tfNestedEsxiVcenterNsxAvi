@@ -64,5 +64,21 @@ do
   gateway=$(jq -r .vcenter.dvs.portgroup.management.gateway $jsonFile)
   prefix_length=$(jq -r .vcenter.dvs.portgroup.management.prefix $jsonFile)
   ip=$(jq -r .vcenter.dvs.portgroup.management.nsx_edge $jsonFile)
+  for host_switche in $(jq -c -r .nsx.config.edge_node.host_switch_spec.host_switches[] $jsonFile)
+  do
+    echo $(echo $host_switche | jq -r .host_switch_profile_names)
+    for host_switch_profile_name in $(echo $item | jq -r .host_switch_profile_names[])
+    do
+      echo $host_switch_profile_name
+      #host_switch_profiles=$(curl -k -X GET -H "vmware-api-session-id: $token" -H "Content-Type: application/json" "https://$api_host/api/vcenter/network")
+      for item in $(echo $host_switch_profiles | jq -c -r .[])
+      do
+        if [[ $(echo $item | jq -r .display_name) == $host_switch_profile_name ]] ; then
+          host_switch_profile_id=$(echo $item | jq -r .id)
+
+        fi
+      done
+    done
+  done
   curl -k -s -X POST -b cookies.txt -H "`grep X-XSRF-TOKEN headers.txt`" -H "Content-Type: application/json" -d '{"maintenance_mode" : "DISABLED", "display_name":"'$name'", "node_deployment_info": {"resource_type":"EdgeNode", "deployment_type": "VIRTUAL_MACHINE", "deployment_config": { "vm_deployment_config": {"vc_id": "'$vc_id'", "compute_id": "'$compute_id'", "storage_id": "'$storage_id'", "management_network_id": "'$management_network_id'", "management_port_subnets": [{"ip_addresses": ["'$ip'"], "prefix_length": '$prefix_length'}], "default_gateway_addresses": ["'$gateway'"], "data_network_ids": ["'$data_network_path'",  "'$data_network_path'"], "reservation_info": { "memory_reservation" : {"reservation_percentage": 100 }, "cpu_reservation": { "reservation_in_shares": "HIGH_PRIORITY", "reservation_in_mhz": 0 }}, "resource_allocation": {"cpu_count": '$cpu', "memory_allocation_in_mb": '$memory' }, "placement_type": "VsphereDeploymentConfig"}, "form_factor": "MEDIUM", "node_user_settings": {"cli_username": "admin", "root_password": "'$TF_VAR_nsx_password'", "cli_password": "'$TF_VAR_nsx_password'"}}, "node_settings": {"hostname": "'$fqdn'", "enable_ssh": true, "allow_ssh_root_login": true }}}' https://$nsx_ip/api/v1/transport-nodes
 done

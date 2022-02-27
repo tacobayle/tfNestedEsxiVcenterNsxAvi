@@ -90,7 +90,7 @@ resource "null_resource" "clear_ssh_key_external_gw_locally" {
   }
 }
 
-resource "null_resource" "add_nic_to_external_gw" {
+resource "null_resource" "add_nic_to_gw_network_nsx_external" {
   depends_on = [vsphere_virtual_machine.external_gw]
 
   provisioner "local-exec" {
@@ -106,8 +106,40 @@ resource "null_resource" "add_nic_to_external_gw" {
   }
 }
 
+resource "null_resource" "add_nic_to_gw_network_nsx_overlay" {
+  depends_on = [vsphere_virtual_machine.external_gw, null_resource.add_nic_to_gw_network_nsx_external]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      export GOVC_USERNAME=${var.vsphere_username}
+      export GOVC_PASSWORD=${var.vsphere_password}
+      export GOVC_DATACENTER=${var.vcenter_underlay.dc}
+      export GOVC_URL=${var.vcenter_underlay.server}
+      export GOVC_CLUSTER=${var.vcenter_underlay.cluster}
+      export GOVC_INSECURE=true
+      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.network_nsx_overlay.name}
+    EOT
+  }
+}
+
+resource "null_resource" "add_nic_to_gw_network_nsx_overlay_edge" {
+  depends_on = [vsphere_virtual_machine.external_gw, null_resource.add_nic_to_gw_network_nsx_external, null_resource.add_nic_to_gw_network_nsx_overlay]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      export GOVC_USERNAME=${var.vsphere_username}
+      export GOVC_PASSWORD=${var.vsphere_password}
+      export GOVC_DATACENTER=${var.vcenter_underlay.dc}
+      export GOVC_URL=${var.vcenter_underlay.server}
+      export GOVC_CLUSTER=${var.vcenter_underlay.cluster}
+      export GOVC_INSECURE=true
+      /usr/local/bin/govc vm.network.add -vm "${var.external_gw.name}" -net ${var.vcenter_underlay.network_nsx_overlay_edge.name}
+    EOT
+  }
+}
+
 resource "null_resource" "update_ip_external_gw" {
-  depends_on = [null_resource.add_nic_to_external_gw]
+  depends_on = [null_resource.add_nic_to_gw_network_nsx_external, null_resource.add_nic_to_gw_network_nsx_overlay, null_resource.add_nic_to_gw_network_nsx_overlay_edge]
   count = (var.external_gw.create == true ? 1 : 0)
 
   connection {
@@ -122,6 +154,10 @@ resource "null_resource" "update_ip_external_gw" {
     inline = [
       "iface=`ip -o link show | awk -F': ' '{print $2}' | head -2 | tail -1`",
       "mac=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -2 | tail -1`",
+      "ifaceSecond=`ip -o link show | awk -F': ' '{print $2}' | head -3 | tail -1`",
+      "macSecond=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -3 | tail -1`",
+      "ifaceThird=`ip -o link show | awk -F': ' '{print $2}' | head -4 | tail -1`",
+      "macThird=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -4 | tail -1`",
       "ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`",
       "macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`",
       "echo \"network:\" | sudo tee ${var.external_gw.netplanFile}",
@@ -135,9 +171,21 @@ resource "null_resource" "update_ip_external_gw" {
       "echo \"            gateway4: ${var.vcenter.dvs.portgroup.management.gateway}\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            nameservers:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"              addresses: [${var.external_gw.dns}]\" | sudo tee -a ${var.external_gw.netplanFile}",
-      "echo \"        $ifaceLastName:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"        $ifaceSecond:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            dhcp4: false\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            addresses: [${var.vcenter.dvs.portgroup.nsx_external.external_gw_ip}/${var.vcenter.dvs.portgroup.nsx_external.prefix}]\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"                macaddress: $macSecond\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            set-name: $ifaceSecond\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"        $ifaceThird:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            dhcp4: false\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            addresses: [${var.nsx.config.ip_pools[0].gateway}/${split("/", var.nsx.config.ip_pools[0].gateway)[1]}]\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"                macaddress: $macThird\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            set-name: $ifaceThird\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"        $ifaceLastName:\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            dhcp4: false\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"            addresses: [${var.nsx.config.ip_pools[1].gateway}/${split("/", var.nsx.config.ip_pools[1].gateway)[1]}]\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"                macaddress: $macLast\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            set-name: $ifaceLastName\" | sudo tee -a ${var.external_gw.netplanFile}",

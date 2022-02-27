@@ -52,18 +52,18 @@
         password: "{{ lookup('env', 'TF_VAR_nsx_password') }}"
         validate_certs: False
         display_name: "{{ item.name }}"
-#        mtu: "{{ item.mtu }}"
+        mtu: "{{ item.mtu }}"
         resource_type: "UplinkHostSwitchProfile"
         teaming:
           active_list: "{{ item.teaming.active_list }}"
           policy: "{{ item.teaming.policy }}"
-        transport_vlan: 0
-        named_teamings:
-          - active_list:
-              - uplink_name: uplink-1
-                uplink_type: PNIC
-            name: external_vlan
-            policy: FAILOVER_ORDER
+        transport_vlan: "{{ item.transport_vlan }}"
+#        named_teamings:
+#          - active_list:
+#              - uplink_name: uplink-1
+#                uplink_type: PNIC
+#            name: external_vlan
+#            policy: FAILOVER_ORDER
         state: "present"
       loop: "{{ nsx.config.uplink_profiles}}"
       when:
@@ -117,8 +117,6 @@
         resource_type: "TransportZone"
         display_name: "{{ item.name }}"
         transport_type: "{{ item.type }}"
-        uplink_teaming_policy_names:
-          - external_vlan
         state: "present"
       loop: "{{ nsx.config.transport_zones}}"
       when:

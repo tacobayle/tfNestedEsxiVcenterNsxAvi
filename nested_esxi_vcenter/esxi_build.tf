@@ -240,11 +240,15 @@ resource "vsphere_virtual_machine" "esxi_multiple_vswitch_with_NSX_with_Avi" {
   }
 
   network_interface {
+    network_id = data.vsphere_network.network_nsx_external[0].id
+  }
+
+  network_interface {
     network_id = data.vsphere_network.network_nsx_overlay[0].id
   }
 
   network_interface {
-    network_id = data.vsphere_network.network_nsx_external[0].id
+    network_id = data.vsphere_network.network_nsx_overlay_edge[0].id
   }
 
   num_cpus = var.esxi.cpu

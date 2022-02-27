@@ -37,9 +37,12 @@
     "network_nsx_overlay": {
       "name": "vxw-dvs-34-virtualwire-124-sid-1080123-sof2-01-vc08-avi-dev120"
       },
-    "network_nsx_external": {
+    "network_nsx_overlay_edge": {
       "name": "vxw-dvs-34-virtualwire-125-sid-1080124-sof2-01-vc08-avi-dev121"
-    }
+    },
+    "network_nsx_external": {
+      "name": "vxw-dvs-34-virtualwire-125-sid-1080124-sof2-01-vc08-avi-dev122"
+      }
     },
   "dns": {
     "nameserver": "10.41.134.134",
@@ -173,7 +176,12 @@
         "nsx_overlay": {
           "name": "nsx-overlay-vds",
           "vlan": 200,
-          "max_mtu": 1600
+          "max_mtu": 1700
+        },
+        "nsx_overlay_edge": {
+          "name": "nsx-overlay-edge-vds",
+          "vlan": 300,
+          "max_mtu": 1700
         },
         "nsx_external": {
           "name": "nsx-external-vds",
@@ -222,22 +230,30 @@
       "role": "NSX Manager"
     },
     "config": {
-      "create": true,
+      "create": false,
       "ip_pools": [
         {
-          "name": "ip_pool_tep",
+          "name": "ip_pool_tep_tn",
           "cidr": "10.8.1.32/27",
           "gateway": "10.8.1.33",
           "start": "10.8.1.34",
           "end": "10.8.1.62"
+        },
+        {
+          "name": "ip_pool_tep_edge",
+          "cidr": "10.8.1.64/27",
+          "gateway": "10.8.1.65",
+          "start": "10.8.1.66",
+          "end": "10.8.1.94"
         }
       ],
       "uplink_profiles": [
         {
           "name": "uplink-profile-default",
-          "mtu": 8700,
+          "mtu": 1700,
+          "transport_vlan": 0,
           "teaming": {
-            "policy": "LOADBALANCE_SRCID",
+            "policy": "FAILOVER_ORDER",
             "active_list": [
               {
                 "uplink_name": "uplink-1",
@@ -287,7 +303,7 @@
               "mode": "STANDARD",
               "type": "VDS",
               "uplink_profile_name": "uplink-profile-default",
-              "ip_pool_name": "ip_pool_tep",
+              "ip_pool_name": "ip_pool_tep_tn",
               "uplinks": [
                 {
                   "uplink_name": "uplink-1",
@@ -297,23 +313,6 @@
               "transport_zones": [
                 {
                   "transport_zone_name": "tz_overlay"
-                }
-              ]
-            },
-            {
-              "name": "nsx-external-vds",
-              "mode": "STANDARD",
-              "type": "VDS",
-              "uplink_profile_name": "uplink-profile-default",
-              "uplinks": [
-                {
-                  "uplink_name": "uplink-1",
-                  "vds_uplink_name": "uplink1"
-                }
-              ],
-              "transport_zones": [
-                {
-                  "transport_zone_name": "tz_vlan"
                 }
               ]
             }
