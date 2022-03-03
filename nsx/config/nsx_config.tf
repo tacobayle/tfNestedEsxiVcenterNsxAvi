@@ -40,7 +40,7 @@ resource "nsxt_policy_ip_pool_static_subnet" "static_subnet" {
 
 }
 
-data "nsxt_policy_transport_zone" "vlan_transport_zone" {
+data "nsxt_policy_transport_zone" "transport_zone_vlan" {
   depends_on = [null_resource.register_compute_manager]
   count = length(var.nsx.config.segments)
   display_name        = var.nsx.config.segments[count.index].transport_zone
@@ -52,7 +52,7 @@ resource "nsxt_policy_segment" "segments_for_single_vds" {
   count = (var.vcenter.dvs.single_vds == true && var.nsx.config.create == true ? length(var.nsx.config.segments) : 0)
   display_name        = var.nsx.config.segments[count.index].name
   vlan_ids = [var.nsx.config.segments[count.index].vlan]
-  transport_zone_path = data.nsxt_policy_transport_zone.vlan_transport_zone[count.index].path
+  transport_zone_path = data.nsxt_policy_transport_zone.transport_zone_vlan[count.index].path
   description         = var.nsx.config.segments[count.index].description
 }
 
@@ -60,8 +60,8 @@ resource "nsxt_policy_segment" "segments_for_multiple_vds" {
   depends_on = [null_resource.register_compute_manager]
   count = (var.vcenter.dvs.single_vds == false && var.nsx.config.create == true ? length(var.nsx.config.segments) : 0)
   display_name        = var.nsx.config.segments[count.index].name
-  vlan_ids = ["0"]
-  transport_zone_path = data.nsxt_policy_transport_zone.vlan_transport_zone[count.index].path
+  vlan_ids = [var.nsx.config.segments[count.index].vlan]
+  transport_zone_path = data.nsxt_policy_transport_zone.transport_zone_vlan[count.index].path
   description         = var.nsx.config.segments[count.index].description
 }
 
@@ -72,9 +72,30 @@ resource "null_resource" "create_transport_node_profiles" {
   }
 }
 
-resource "null_resource" "create_host_transport_node" {
+resource "null_resource" "create_host_transport_nodes" {
   depends_on = [null_resource.create_transport_node_profiles]
   provisioner "local-exec" {
-    command = "/bin/bash bash/create_host_transport_node.sh"
+    command = "/bin/bash bash/host_transport_nodes.sh"
+  }
+}
+
+resource "null_resource" "create_edge_nodes" {
+  depends_on = [null_resource.create_host_transport_nodes]
+  provisioner "local-exec" {
+    command = "/bin/bash bash/edges.sh"
+  }
+}
+
+resource "null_resource" "create_edge_clusters" {
+  depends_on = [null_resource.create_edge_nodes]
+  provisioner "local-exec" {
+    command = "/bin/bash bash/edge_clusters.sh"
+  }
+}
+
+resource "null_resource" "create_tier0s" {
+  depends_on = [null_resource.create_edge_clusters]
+  provisioner "local-exec" {
+    command = "/bin/bash bash/tier0s.sh"
   }
 }

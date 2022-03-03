@@ -52,7 +52,7 @@
         password: "{{ lookup('env', 'TF_VAR_nsx_password') }}"
         validate_certs: False
         display_name: "{{ item.name }}"
-        mtu: "{{ item.mtu }}"
+#        mtu: "{{ item.mtu }}" - does not work if uplink_profile is reused in a transport node profile connected to a vds.
         resource_type: "UplinkHostSwitchProfile"
         teaming:
           active_list: "{{ item.teaming.active_list }}"

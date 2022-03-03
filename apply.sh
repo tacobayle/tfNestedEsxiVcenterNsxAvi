@@ -12,6 +12,23 @@ else
   exit 255
 fi
 #
+# Sanity checks
+#
+IFS=$'\n'
+ip_count_external_tier0=$(jq -c -r '.vcenter.dvs.portgroup.nsx_external.tier0_ips | length' $jsonFile)
+tier0_ifaces=0
+for tier0 in $(jq -c -r .nsx.config.tier0s[] $jsonFile)
+do
+#  echo $tier0
+  tier0_ifaces=$((tier0_ifaces+$(echo $tier0 | jq -c -r '.interfaces | length')))
+done
+if [[ $tier0_ifaces -gt $ip_count_external_tier0 ]] ; then
+  echo "Amount of IPs given for external tier0_ifaces (.vcenter.dvs.portgroup.nsx_external.tier0_ips) can cover the amount of tier0_ifaces defined in .nsx.config.tier0s[].interfaces"
+  exit 255
+fi
+#
+
+#
 # Prerequisites to be added
 # govc install
 # jq install
@@ -83,7 +100,7 @@ fi
 if [[ $(jq -c -r .nsx.manager.create $jsonFile) == true ]] || [[ $(jq -c -r .nsx.content_library.create $jsonFile) == true ]] ; then
   tf_init_apply "Build of the nested NSXT Manager - This should take less than 20 minutes" nsx/manager ../../logs/tf_nsx.stdout ../../logs/tf_nsx.errors ../../$jsonFile
   if [[ $(jq -c -r .nsx.manager.create $jsonFile) == true ]] ; then
-    echo "waiting for 5 minutes to finish the NSXT bootsrap..."
+    echo "waiting for 5 minutes to finish the NSXT bootstrap..."
     sleep 300
   fi
 fi

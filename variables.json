@@ -145,7 +145,7 @@
           "external_gw_ip": "10.41.134.140",
           "nsx_ip": "10.41.134.136",
           "nsx_vip": "10.41.134.137",
-          "nsx_edge": "10.41.134.138",
+          "nsx_edge": ["10.41.134.138", "10.41.134.139"],
           "avi_ips": ["10.41.134.139"],
           "ssh_gw_ip": "10.41.134.141",
           "avi_app_ips": ["10.41.134.142", "10.41.134.143"]
@@ -180,7 +180,8 @@
           "max_mtu": 1600,
           "netmask": "255.255.255.0",
           "prefix": "24",
-          "external_gw_ip": "172.16.100.100"
+          "external_gw_ip": "172.16.100.100",
+          "tier0_ips": ["172.16.100.110", "172.16.100.111"]
         },
         "avi_mgmt": {
           "name": "avi_mgmt",
@@ -266,22 +267,10 @@
       ],
       "segments": [
         {
-          "name": "segment1",
-          "vlan": "200, 250, 260",
+          "name": "segment_external",
+          "vlan": "0",
           "transport_zone": "tz_vlan",
-          "description": "Segment configured as Trunk, used for NSX Edge Nodes external connectivity"
-        },
-        {
-          "name": "segment2",
-          "vlan": "200, 250, 260",
-          "transport_zone": "tz_vlan",
-          "description": "Segment configured as Trunk, used for NSX Edge Nodes external connectivity"
-        },
-        {
-          "name": "external_segment",
-          "vlan": "1-4092",
-          "transport_zone": "tz_vlan",
-          "description": "Segment configured as Trunk, used for NSX Edge Nodes external connectivity"
+          "description": "Segment configured for tier0 external connectivity"
         }
       ],
       "transport_node_profiles": [
@@ -301,19 +290,14 @@
                   "vds_uplink_name": "uplink1"
                 }
               ],
-              "transport_zones": [
-                {
-                  "transport_zone_name": "tz_overlay"
-                }
-              ]
+              "transport_zones": [ { "transport_zone_name": "tz_overlay" } ]
             }
           ]
         }
       ],
       "edge_node":
       {
-        "count": 1,
-        "basename": "edge-",
+        "basename": "edge-0",
         "cpu": 4,
         "memory": 8192,
         "disk": 200,
@@ -321,50 +305,76 @@
         "host_switch_spec": {
           "host_switches" : [
             {
-              "host_switch_name": "switch_overlay",
+              "host_switch_name": "nsxHostSwitch_overlay",
               "host_switch_type": "NVDS",
               "host_switch_mode": "STANDARD",
-              "host_switch_profile_names": [
-                "uplink-profile-default"
-              ],
+              "host_switch_profile_names": ["uplink-profile-default"],
               "pnics": [
                 {
                   "device_name": "fp-eth0",
-                  "uplink_name": "uplink1"
+                  "uplink_name": "uplink-1"
                 }
               ],
-              "ip_assignment_spec": {
-                "ip_pool_name": "ip_pool_tep",
-                "resource_type": "StaticIpPoolSpec"
-              },
-              "transport_zone_endpoints": [
-                {
-                  "transport_zone_name": "tz_overlay"
-                }
-              ]
+              "ip_pool_name": "ip_pool_tep_edge",
+              "transport_zone_names": ["tz_overlay"]
             },
             {
-              "host_switch_name": "switch_external",
+              "host_switch_name": "nsxHostSwitch_external",
               "host_switch_type": "NVDS",
               "host_switch_mode": "STANDARD",
-              "host_switch_profile_names": [
-                "uplink-profile-default"
-              ],
+              "host_switch_profile_names": ["uplink-profile-default"],
               "pnics": [
                 {
                   "device_name": "fp-eth1",
-                  "uplink_name": "uplink2"
+                  "uplink_name": "uplink-1"
                 }
               ],
-              "transport_zone_endpoints": [
-                {
-                  "transport_zone_name": "tz_vlan"
-                }
-              ]
+              "transport_zone_names": ["tz_vlan"]
             }
           ]
         }
-      }
+      },
+      "edge_clusters":
+      [
+        {
+          "display_name": "my-edge-cluster-01",
+          "members_name": [
+            "edge-01",
+            "edge-02"
+          ]
+        }
+      ],
+      "tier0s":
+      [
+        {
+          "display_name": "my-tier0",
+          "ha_mode" : "ACTIVE_STANDBY",
+          "edge_cluster_name": "my-edge-cluster-01",
+          "interfaces" :
+          [
+            {
+              "edge_name": "edge-01",
+              "segment_name": "segment_external",
+              "type" : "EXTERNAL",
+              "display_name" : "if-ext-0"
+            },
+            {
+              "edge_name": "edge-02",
+              "segment_name": "segment_external",
+              "type" : "EXTERNAL",
+              "display_name" : "if-ext-1"
+            }
+          ],
+          "static_routes":
+          [
+            {
+              "display_name" : "default-route",
+              "network" : "0.0.0.0/0",
+              "next_hops" : [ { "ip_address": "172.16.100.100" } ]
+            }
+          ]
+        }
+      ]
     }
   },
   "avi": {

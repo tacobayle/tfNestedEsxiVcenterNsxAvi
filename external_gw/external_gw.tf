@@ -160,6 +160,8 @@ resource "null_resource" "update_ip_external_gw" {
       "macThird=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -4 | tail -1`",
       "ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`",
       "macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`",
+      "sudo ip link set dev $ifaceThird mtu ${var.vcenter.dvs.portgroup.nsx_overlay.max_mtu}",
+      "sudo ip link set dev $ifaceLastName mtu ${var.vcenter.dvs.portgroup.nsx_overlay_edge.max_mtu}",
       "echo \"network:\" | sudo tee ${var.external_gw.netplanFile}",
       "echo \"    ethernets:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"        $iface:\" | sudo tee -a ${var.external_gw.netplanFile}",
@@ -190,7 +192,9 @@ resource "null_resource" "update_ip_external_gw" {
       "echo \"                macaddress: $macLast\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            set-name: $ifaceLastName\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"    version: 2\" | sudo tee -a ${var.external_gw.netplanFile}",
-      "sudo netplan apply"
+      "sudo netplan apply",
+      "sudo sysctl -w net.ipv4.ip_forward=1",
+      "echo \"net.ipv4.ip_forward=1\" | sudo tee -a /etc/sysctl.conf"
     ]
   }
 }
