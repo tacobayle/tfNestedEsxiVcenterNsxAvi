@@ -374,6 +374,52 @@
             }
           ]
         }
+      ],
+      "tier1s":
+      [
+        {
+          "tier0": "my-tier0",
+          "display_name": "my-tier1",
+          "route_advertisement_types": ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED", "TIER1_LB_VIP"]
+        }
+      ],
+      "segments_overlay":
+      [
+        {
+          "display_name": "my-segment-mgmt",
+          "tier1": "my-tier1",
+          "transport_zone": "tz_overlay",
+          "cidr": "100.100.10.0/24",
+          "gw": "1"
+        },
+        {
+          "display_name": "my-segment-server-1",
+          "tier1": "my-tier1",
+          "transport_zone": "tz_overlay",
+          "cidr": "100.100.21.0/24",
+          "gw": "1"
+        },
+        {
+          "display_name": "my-segment-server-2",
+          "tier1": "my-tier1",
+          "transport_zone": "tz_overlay",
+          "cidr": "100.100.22.0/24",
+          "gw": "1"
+        },
+        {
+          "display_name": "my-segment-vip-1",
+          "tier1": "my-tier1",
+          "transport_zone": "tz_overlay",
+          "cidr": "100.100.31.0/24",
+          "gw": "1"
+        },
+        {
+          "display_name": "my-segment-vip-2",
+          "tier1": "my-tier1",
+          "transport_zone": "tz_overlay",
+          "cidr": "100.100.32.0/24",
+          "gw": "1"
+        }
       ]
     }
   },

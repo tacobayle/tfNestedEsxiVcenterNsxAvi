@@ -99,3 +99,44 @@ resource "null_resource" "create_tier0s" {
     command = "/bin/bash bash/tier0s.sh"
   }
 }
+
+data "nsxt_policy_tier0_gateway" "tier0s_for_tier1s" {
+  depends_on = [null_resource.create_tier0s]
+  count = length(var.nsx.config.tier1s)
+  display_name = var.nsx.config.tier1s[count.index].tier0
+}
+
+resource "nsxt_policy_tier1_gateway" "tier1s" {
+  count = length(var.nsx.config.tier1s)
+  display_name              = var.nsx.config.tier1s[count.index].display_name
+  tier0_path                = data.nsxt_policy_tier0_gateway.tier0s_for_tier1s[count.index].path
+  route_advertisement_types = var.nsx.config.tier1s[count.index].route_advertisement_types
+}
+
+resource "time_sleep" "wait_tier1" {
+  count = length(var.nsx.config.tier1s)
+  depends_on = [nsxt_policy_tier1_gateway.tier1s]
+  create_duration = "10s"
+}
+
+data "nsxt_policy_tier1_gateway" "tier1s_for_segments_overlay" {
+  depends_on = [nsxt_policy_tier1_gateway.tier1s]
+  count = length(var.nsx.config.segments_overlay)
+  display_name = var.nsx.config.segments_overlay[count.index].tier1
+}
+
+data "nsxt_policy_transport_zone" "tzs_for_segments_overlay" {
+  depends_on = [null_resource.create_tier0s]
+  count = length(var.nsx.config.segments_overlay)
+  display_name = var.nsx.config.segments_overlay[count.index].transport_zone
+}
+
+resource "nsxt_policy_fixed_segment" "segments" {
+  count = length(var.nsx.config.segments_overlay)
+  display_name        = var.nsx.config.segments_overlay[count.index].display_name
+  connectivity_path   = data.nsxt_policy_tier1_gateway.tier1s_for_segments_overlay[count.index].path
+  transport_zone_path = data.nsxt_policy_transport_zone.tzs_for_segments_overlay[count.index].path
+  subnet {
+    cidr        = "${cidrhost(var.nsx.config.segments_overlay[count.index].cidr, var.nsx.config.segments_overlay[count.index].gw)}/${split("/", var.nsx.config.segments_overlay[count.index].cidr)[1]}"
+  }
+}
