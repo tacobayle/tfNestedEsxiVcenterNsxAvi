@@ -100,7 +100,7 @@
   "external_gw": {
     "create": true,
     "dns": "10.23.108.1, 10.16.142.111",
-    "name": "external_gw",
+    "name": "external-gw",
     "cpu": 2,
     "memory": 4096,
     "disk": 20,
@@ -108,7 +108,19 @@
     "private_key_path": "~/.ssh/cloudKey",
     "wait_for_guest_net_timeout": 2,
     "username": "ubuntu",
-    "netplanFile": "/etc/netplan/50-cloud-init.yaml"
+    "netplanFile": "/etc/netplan/50-cloud-init.yaml",
+    "routes_description": "the following routes will be installed under the external interface",
+    "routes":
+    [
+      {
+        "to": "100.100.0.0/16",
+        "via": "172.16.100.110"
+      },
+      {
+        "to": "100.100.0.0/16",
+        "via": "172.16.100.111"
+      }
+    ]
   },
   "vcenter": {
     "iso_source_location": "/home/ubuntu/bin/VMware-VCSA-all-7.0.3-18778458.iso",

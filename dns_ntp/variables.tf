@@ -12,3 +12,4 @@ variable "vsphere_password" {}
 variable "bind_password" {}
 
 
+

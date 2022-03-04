@@ -20,6 +20,8 @@ data "template_file" "external_gw_userdata" {
     ipCidr  = "${var.vcenter.dvs.portgroup.management.external_gw_ip}/${var.vcenter.dvs.portgroup.management.prefix}"
     ip = var.vcenter.dvs.portgroup.management.external_gw_ip
     defaultGw = var.vcenter.dvs.portgroup.management.gateway
+    password      = var.ubuntu_password
+    hostname = var.external_gw.name
 //    ip_data_cidr  = "${var.vcenter.dvs.portgroup.nsx_external.external_gw_ip}/${var.vcenter.dvs.portgroup.nsx_external.prefix}"
     dns      = var.external_gw.dns
     netplanFile = var.external_gw.netplanFile
