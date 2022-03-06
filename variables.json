@@ -110,17 +110,10 @@
     "username": "ubuntu",
     "netplanFile": "/etc/netplan/50-cloud-init.yaml",
     "routes_description": "the following routes will be installed under the external interface",
-    "routes":
-    [
-      {
-        "to": "100.100.0.0/16",
-        "via": "172.16.100.110"
-      },
-      {
-        "to": "100.100.0.0/16",
-        "via": "172.16.100.111"
-      }
-    ]
+    "routes": {
+      "to": "100.100.0.0/16",
+      "via": "172.16.100.110"
+    }
   },
   "vcenter": {
     "iso_source_location": "/home/ubuntu/bin/VMware-VCSA-all-7.0.3-18778458.iso",
@@ -402,7 +395,9 @@
           "tier1": "my-tier1",
           "transport_zone": "tz_overlay",
           "cidr": "100.100.10.0/24",
-          "gw": "1"
+          "gw": "1",
+          "avi_controller": "10",
+          "description": "keep the management segment at the first position"
         },
         {
           "display_name": "my-segment-server-1",

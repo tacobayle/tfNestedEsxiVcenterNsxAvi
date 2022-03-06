@@ -23,26 +23,20 @@ data "vsphere_resource_pool" "resource_pool_nested" {
 }
 
 data "vsphere_network" "vcenter_network_mgmt_nested" {
-  count = (var.vcenter.dvs.single_vds == false && var.nsx.manager.create == false && var.avi.controller.create == true ? 1 : 0)
-  name = var.vcenter.dvs.portgroup.management.name
-  datacenter_id = data.vsphere_datacenter.dc_nested[0].id
-}
-
-data "vsphere_network" "vcenter_network_avi_mgmt_nested" {
-  count = (var.vcenter.dvs.single_vds == false && var.nsx.manager.create == false && var.avi.controller.create == true ? 1 : 0)
-  name = "avi_mgmt"
+  count = var.avi.controller.create == true ? 1 : 0
+  name = var.nsx.config.segments_overlay[0].display_name
   datacenter_id = data.vsphere_datacenter.dc_nested[0].id
 }
 
 resource "vsphere_content_library" "nested_library_avi" {
-  count = (var.avi.controller.create == true || var.avi.content_library.create == true ? 1 : 0)
+  count = var.avi.controller.create == true || var.avi.content_library.create == true ? 1 : 0
   name            = "avi_controller"
   storage_backing = [data.vsphere_datastore.datastore_nested[0].id]
   description     = "avi_controller"
 }
 
 resource "vsphere_content_library_item" "nested_library_avi_item" {
-  count = (var.avi.controller.create == true || var.avi.content_library.create == true ? 1 : 0)
+  count = var.avi.controller.create == true || var.avi.content_library.create == true ? 1 : 0
   name        = basename(var.avi.content_library.ova_location)
   description = basename(var.avi.content_library.ova_location)
   library_id  = vsphere_content_library.nested_library_avi[0].id
