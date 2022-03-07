@@ -63,8 +63,6 @@ tf_init_apply () {
   echo "Ending timestamp: $(date)"
   cd - > /dev/null
 }
-
-
 #
 # Build of a folder on the underlay infrastructure
 #
@@ -110,6 +108,10 @@ fi
 if [[ $(jq -c -r .nsx.config.create $jsonFile) == true ]] ; then
   tf_init_apply "Build of the config of NSX-T" nsx/config ../../logs/tf_nsx_config.stdout ../../logs/tf_nsx_config.errors ../../$jsonFile
 fi
+#
+# Routes to join overlay network
+#
+sudo ip route add $(jq -c -r .external_gw.routes.to $jsonFile) via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
 #
 # Build of the Nested Avi Controllers
 #

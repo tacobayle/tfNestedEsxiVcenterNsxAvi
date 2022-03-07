@@ -112,7 +112,7 @@
     "routes_description": "the following routes will be installed under the external interface",
     "routes": {
       "to": "100.100.0.0/16",
-      "via": "172.16.100.110"
+      "via": "172.16.100.111"
     }
   },
   "vcenter": {
@@ -186,7 +186,8 @@
           "netmask": "255.255.255.0",
           "prefix": "24",
           "external_gw_ip": "172.16.100.100",
-          "tier0_ips": ["172.16.100.110", "172.16.100.111"]
+          "tier0_ha_ip": "172.16.100.110",
+          "tier0_ips": ["172.16.100.111", "172.16.100.112"]
         },
         "avi_mgmt": {
           "name": "avi_mgmt",
@@ -227,7 +228,7 @@
       "role": "NSX Manager"
     },
     "config": {
-      "create": false,
+      "create": true,
       "ip_pools": [
         {
           "name": "ip_pool_tep_tn",
@@ -272,7 +273,7 @@
       ],
       "segments": [
         {
-          "name": "segment_external",
+          "name": "segment-external",
           "vlan": "0",
           "transport_zone": "tz_vlan",
           "description": "Segment configured for tier0 external connectivity"
@@ -359,15 +360,9 @@
           [
             {
               "edge_name": "edge-01",
-              "segment_name": "segment_external",
+              "segment_name": "segment-external",
               "type" : "EXTERNAL",
               "display_name" : "if-ext-0"
-            },
-            {
-              "edge_name": "edge-02",
-              "segment_name": "segment_external",
-              "type" : "EXTERNAL",
-              "display_name" : "if-ext-1"
             }
           ],
           "static_routes":

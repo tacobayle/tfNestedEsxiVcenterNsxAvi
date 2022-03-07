@@ -49,7 +49,7 @@ data "nsxt_policy_transport_zone" "transport_zone_vlan" {
 
 resource "nsxt_policy_segment" "segments_for_single_vds" {
   depends_on = [null_resource.register_compute_manager]
-  count = (var.vcenter.dvs.single_vds == true && var.nsx.config.create == true ? length(var.nsx.config.segments) : 0)
+  count = (var.vcenter.dvs.single_vds == true ? length(var.nsx.config.segments) : 0)
   display_name        = var.nsx.config.segments[count.index].name
   vlan_ids = [var.nsx.config.segments[count.index].vlan]
   transport_zone_path = data.nsxt_policy_transport_zone.transport_zone_vlan[count.index].path
@@ -58,7 +58,7 @@ resource "nsxt_policy_segment" "segments_for_single_vds" {
 
 resource "nsxt_policy_segment" "segments_for_multiple_vds" {
   depends_on = [null_resource.register_compute_manager]
-  count = (var.vcenter.dvs.single_vds == false && var.nsx.config.create == true ? length(var.nsx.config.segments) : 0)
+  count = (var.vcenter.dvs.single_vds == false ? length(var.nsx.config.segments) : 0)
   display_name        = var.nsx.config.segments[count.index].name
   vlan_ids = [var.nsx.config.segments[count.index].vlan]
   transport_zone_path = data.nsxt_policy_transport_zone.transport_zone_vlan[count.index].path
