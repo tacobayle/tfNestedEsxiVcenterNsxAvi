@@ -33,10 +33,16 @@ do
   if [[ $(echo $item | jq -r .name) == $(jq -r .vcenter.dvs.portgroup.management.name $jsonFile) ]] ; then
     management_network_id=$(echo $item | jq -r .network)
   fi
+done
+for item in $(echo $vcenter_networks | jq -c -r .[])
+do
   if [[ $(echo $item | jq -r .name) == $(jq -r .vcenter.dvs.portgroup.nsx_overlay_edge.name $jsonFile)-pg ]] ; then
     data_network_id=$(echo $item | jq -r .network)
     data_network_ids=$(echo $data_network_ids | jq '. += ["'$data_network_id'"]')
   fi
+done
+for item in $(echo $vcenter_networks | jq -c -r .[])
+do
   if [[ $(echo $item | jq -r .name) == $(jq -r .vcenter.dvs.portgroup.nsx_external.name $jsonFile)-pg ]] ; then
     data_network_id=$(echo $item | jq -r .network)
     data_network_ids=$(echo $data_network_ids | jq '. += ["'$data_network_id'"]')
