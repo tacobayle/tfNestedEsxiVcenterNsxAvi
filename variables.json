@@ -431,15 +431,12 @@
     }
   },
   "avi": {
-    "networks": {
-      "create": false
-    },
     "content_library": {
-      "create": false,
+      "create": true,
       "ova_location": "/home/ubuntu/bin/controller-21.1.1-9045.ova"
     },
     "controller": {
-      "create": false,
+      "create": true,
       "cpu": 8,
       "memory": 24768,
       "disk": 128,
