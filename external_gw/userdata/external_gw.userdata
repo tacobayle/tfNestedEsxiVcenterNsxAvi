@@ -14,6 +14,26 @@ hostname: ${hostname}
 write_files:
   - content: |
       #!/bin/bash
+      run_cmd() {
+        retry=10
+        pause=60
+        attempt=0
+        echo "############################################################################################"
+        while [ $attempt -ne $retry ]; do
+          if eval "$@"; then
+            echo "$1 PASSED"
+            break
+          else
+            echo "$1 FAILED"
+          fi
+          ((attempt++))
+          sleep $pause
+          if [ $attempt -eq $retry ]; then
+            echo "$1 FAILED after $retry retries" | tee /tmp/cloudInitFailed.log
+            exit 255
+          fi
+        done
+      }
       iface=`ip -o link show | awk -F': ' '{print $2}' | tail -1`
       mac=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | tail -1`
       hostname=`hostname`
@@ -32,6 +52,15 @@ write_files:
       echo "              addresses: [${dns}]" | sudo tee -a ${netplanFile}
       echo "    version: 2" | sudo tee -a ${netplanFile}
       sudo netplan apply
+      run_cmd '! sudo apt update | grep Err'
+      run_cmd 'sudo apt install -y python3-pip; ls /usr/bin/pip3'
+      run_cmd 'sudo apt install -y python3-jmespath; pip3 list | grep jmespath'
+      run_cmd 'pip3 install --upgrade pip'
+      run_cmd 'pip3 install ansible==${ansible_version}; ls /usr/local/bin/ansible-playbook'
+      run_cmd 'pip3 install avisdk==${avi_sdk_version}; pip3 list | grep avisdk'
+      run_cmd 'sudo -u ubuntu ansible-galaxy collection install vmware.alb; sudo -u ubuntu ansible-galaxy collection list | grep vmware.alb'
+      run_cmd 'pip3 install dnspython; pip3 list | grep dnspython'
+      run_cmd 'pip3 install netaddr; pip3 list | grep netaddr'
       echo "cloud init done" | tee /tmp/cloudInitDone.log
     path: /opt/bootstrap.sh
     permissions: 0755

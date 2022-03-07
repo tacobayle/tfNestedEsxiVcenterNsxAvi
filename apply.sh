@@ -109,7 +109,7 @@ if [[ $(jq -c -r .nsx.config.create $jsonFile) == true ]] ; then
   tf_init_apply "Build of the config of NSX-T" nsx/config ../../logs/tf_nsx_config.stdout ../../logs/tf_nsx_config.errors ../../$jsonFile
 fi
 #
-# Routes to join overlay network
+# Add Routes to join overlay network
 #
 sudo ip route add $(jq -c -r .external_gw.routes.to $jsonFile) via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
 #
@@ -145,6 +145,10 @@ if [[ $(jq -c -r .avi.controller.create $jsonFile) == true ]] || [[ $(jq -c -r .
 #  fi
   tf_init_apply "Build of Nested Avi Controllers - This should take around 15 minutes" avi/controllers ../../logs/tf_avi.stdout ../../logs/tf_avi.errors ../../$jsonFile
 fi
+#
+# Remove Routes to join overlay network
+#
+sudo ip route del $(jq -c -r .external_gw.routes.to $jsonFile) via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
 #
 # Build of the config of Avi
 #
