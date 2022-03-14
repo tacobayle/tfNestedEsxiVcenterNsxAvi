@@ -10,6 +10,16 @@ nsx_ip=$(jq -r .vcenter.dvs.portgroup.management.nsx_ip $jsonFile)
 rm -f cookies.txt headers.txt
 curl -k -c cookies.txt -D headers.txt -X POST -d 'j_username=admin&j_password='$TF_VAR_nsx_password'' https://$nsx_ip/api/session/create
 IFS=$'\n'
+#
+# check the json syntax for tier0s (.nsx.config.edge_clusters)
+#
+if [[ $(jq 'has("nsx")' $jsonFile) && $(jq '.nsx | has("config")' $jsonFile) && $(jq '.nsx.config | has("edge_clusters")' $jsonFile) == "false" ]] ; then
+  echo "no json valid entry for nsx.config.edge_clusters"
+  exit
+fi
+#
+# edge cluster creation
+#
 new_json=[]
 edge_cluster_count=0
 for edge_cluster in $(jq -c -r .nsx.config.edge_clusters[] $jsonFile)
@@ -33,6 +43,6 @@ do
 done
 for edge_cluster in $(echo $new_json | jq .[] -c -r)
 do
-  echo $edge_cluster
+  echo "edge cluster creation"
   curl -k -s -X POST -b cookies.txt -H "`grep X-XSRF-TOKEN headers.txt`" -H "Content-Type: application/json" -d $(echo $edge_cluster) https://$nsx_ip/api/v1/edge-clusters
 done
