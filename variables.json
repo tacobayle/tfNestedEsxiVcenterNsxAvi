@@ -450,7 +450,7 @@
       "create": false
       },
     "app": {
-      "create": true,
+      "create": false,
       "basename": "avi-app-",
       "count": 3,
       "description": "this will deploy the same amount of server (count) on each server segment (nsx.config.segments_overlay[1] and nsx.config.segments_overlay[2])",
