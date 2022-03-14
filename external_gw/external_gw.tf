@@ -160,10 +160,6 @@ resource "null_resource" "update_ip_external_gw_1" {
       "mac=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -2 | tail -1`",
       "ifaceSecond=`ip -o link show | awk -F': ' '{print $2}' | head -3 | tail -1`",
       "macSecond=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -3 | tail -1`",
-      "ifaceThird=`ip -o link show | awk -F': ' '{print $2}' | head -4 | tail -1`",
-      "macThird=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -4 | tail -1`",
-      "ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`",
-      "macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`",
       "sudo ip link set dev $ifaceThird mtu ${var.vcenter.dvs.portgroup.nsx_overlay.max_mtu}",
       "sudo ip link set dev $ifaceLastName mtu ${var.vcenter.dvs.portgroup.nsx_overlay_edge.max_mtu}",
       "echo \"network:\" | sudo tee ${var.external_gw.netplanFile}",
@@ -225,6 +221,10 @@ resource "null_resource" "update_ip_external_gw_3" {
 
   provisioner "remote-exec" {
     inline = [
+      "ifaceThird=`ip -o link show | awk -F': ' '{print $2}' | head -4 | tail -1`",
+      "macThird=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -4 | tail -1`",
+      "ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`",
+      "macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`",
       "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"                macaddress: $macSecond\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            set-name: $ifaceSecond\" | sudo tee -a ${var.external_gw.netplanFile}",
