@@ -1,12 +1,15 @@
 #cloud-config
 users:
-  - name: ${username}
-    lock_passwd: true
-    shell: /bin/bash
-    sudo:  ALL=(ALL) NOPASSWD:ALL
-    chpasswd: {expire: False}
-    ssh_authorized_keys:
-      - ${pubkey}
+  - default
+
+ssh_pwauth: True
+
+chpasswd:
+  list: |
+    ubuntu:${password}
+  expire: False
+
+hostname: ${hostname}
 
 write_files:
   - content: |
@@ -21,7 +24,7 @@ write_files:
       echo "    ethernets:" | sudo tee -a ${netplan_file}
       echo "        $ifaceFirstName:" | sudo tee -a ${netplan_file}
       echo "            dhcp4: false" | sudo tee -a ${netplan_file}
-      echo "            addresses: [${ip_mgmt}/${prefix_mgmt}]" | sudo tee -a ${netplan_file}
+      echo "            addresses: [${ip}/${prefix}]" | sudo tee -a ${netplan_file}
       echo "            match:" | sudo tee -a ${netplan_file}
       echo "                macaddress: $macFirst" | sudo tee -a ${netplan_file}
       echo "            set-name: $ifaceFirstName" | sudo tee -a ${netplan_file}

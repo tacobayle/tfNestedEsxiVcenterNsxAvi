@@ -1,36 +1,29 @@
 data "vsphere_datacenter" "dc_nested" {
 //  depends_on = [null_resource.dual_uplink_update_multiple_vds, null_resource.dual_uplink_update_single_vds]
-  count = (var.avi.app.create == true ? 1 : 0)
   name = var.vcenter.datacenter
 }
 
 data "vsphere_compute_cluster" "compute_cluster_nested" {
-  count = (var.avi.app.create == true ? 1 : 0)
   name          = var.vcenter.cluster
-  datacenter_id = data.vsphere_datacenter.dc_nested[0].id
+  datacenter_id = data.vsphere_datacenter.dc_nested.id
 }
 
 data "vsphere_datastore" "datastore_nested" {
-  count = (var.avi.app.create == true ? 1 : 0)
   name = "vsanDatastore"
-  datacenter_id = data.vsphere_datacenter.dc_nested[0].id
+  datacenter_id = data.vsphere_datacenter.dc_nested.id
 }
 
 data "vsphere_resource_pool" "resource_pool_nested" {
-  count = (var.avi.app.create == true ? 1 : 0)
   name          = "${var.vcenter.cluster}/Resources"
-  datacenter_id = data.vsphere_datacenter.dc_nested[0].id
+  datacenter_id = data.vsphere_datacenter.dc_nested.id
 }
 
-data "vsphere_resource_pool" "resource_pool_nested_avi_app" {
-  count = (var.avi.app.create == true ? 1 : 0)
-  name          = var.avi.app.resource_pool
-  datacenter_id = data.vsphere_datacenter.dc_nested[0].id
+data "vsphere_network" "vcenter_network_1" {
+  name = var.nsx.config.segments_overlay[1].display_name
+  datacenter_id = data.vsphere_datacenter.dc_nested.id
 }
 
-data "vsphere_network" "vcenter_network_mgmt_nested" {
-  count = (var.avi.app.create == true ? 1 : 0)
-  name = var.vcenter.dvs.portgroup.management.name
-  datacenter_id = data.vsphere_datacenter.dc_nested[0].id
+data "vsphere_network" "vcenter_network_2" {
+  name = var.nsx.config.segments_overlay[2].display_name
+  datacenter_id = data.vsphere_datacenter.dc_nested.id
 }
-

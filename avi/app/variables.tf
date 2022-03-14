@@ -7,6 +7,7 @@ variable "vcenter" {}
 variable "nsx" {}
 variable "avi" {}
 variable "ssh_gw" {}
+variable "ubuntu_password" {}
 
 //variable "esxi_root_password" {}
 //variable "vsphere_username" {}

@@ -29,7 +29,7 @@ resource "vsphere_virtual_machine" "controller" {
     properties = {
       "mgmt-ip"     = cidrhost(var.nsx.config.segments_overlay[0].cidr, var.nsx.config.segments_overlay[count.index].avi_controller)
       "mgmt-mask"   = cidrnetmask(var.nsx.config.segments_overlay[0].cidr)
-      "default-gw"  = cidrhost(var.nsx.config.segments_overlay[0].cidr, var.nsx.config.segments_overlay[count.index].gw)
+      "default-gw"  = cidrhost(var.nsx.config.segments_overlay[0].cidr, var.nsx.config.segments_overlay[0].gw)
    }
  }
 }

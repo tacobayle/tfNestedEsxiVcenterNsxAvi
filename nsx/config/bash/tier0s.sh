@@ -26,6 +26,7 @@ do
   new_json=$(echo $tier0 | jq -c -r '. | del (.edge_cluster_name)')
   new_json=$(echo $new_json | jq -c -r '. | del (.interfaces)')
   new_json=$(echo $new_json | jq -c -r '. | del (.static_routes)')
+  new_json=$(echo $new_json | jq -c -r '. | del (.ha_vips)')
   echo "creating the tier0 called $(echo $tier0 | jq -r -c .display_name)"
   curl -k -s -X PUT -b cookies.txt -H "`grep X-XSRF-TOKEN headers.txt`" -H "Content-Type: application/json" -d $(echo $new_json) https://$nsx_ip/policy/api/v1/infra/tier-0s/$(echo $tier0 | jq -r -c .display_name)
 done
@@ -56,7 +57,7 @@ do
   if [[ $(echo $tier0 | jq 'has("interfaces")') == "true" ]] ; then
     for interface in $(echo $tier0 | jq -c -r .interfaces[])
     do
-      new_json="{\"subnets\" : [ {\"ip_addresses\": [\"\$(jq -c -r '.vcenter.dvs.portgroup.nsx_external.tier0_ips['$ip_index']' $jsonFile)\"], \"prefix_len\" : $(jq -c -r '.vcenter.dvs.portgroup.nsx_external.prefix' $jsonFile)}]}"
+      new_json="{\"subnets\" : [ {\"ip_addresses\": [\"$(jq -c -r '.vcenter.dvs.portgroup.nsx_external.tier0_ips['$ip_index']' $jsonFile)\"], \"prefix_len\" : $(jq -c -r '.vcenter.dvs.portgroup.nsx_external.prefix' $jsonFile)}]}"
       ip_index=$((ip_index+1))
       new_json=$(echo $new_json | jq .)
       new_json=$(echo $new_json | jq '. += {"display_name": "'$(echo $interface | jq -r .display_name)'"}')

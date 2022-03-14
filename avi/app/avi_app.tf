@@ -1,14 +1,15 @@
-data "template_file" "avi_app_userdata" {
-  count = (var.avi.app.create == true ? length(var.vcenter.dvs.portgroup.management.avi_app_ips) : 0)
+data "template_file" "avi_app_userdata_segment_1" {
+  count = var.avi.app.count
   template = file("${path.module}/userdata/avi_app.userdata")
   vars = {
     username     = var.avi.app.username
-    hostname     = "avi_app-${count.index}"
+    hostname     = "${var.avi.app.basename}${count.index}"
+    password      = var.ubuntu_password
     pubkey       = file(var.avi.app.public_key_path)
     netplan_file  = var.avi.app.netplan_file
-    prefix_mgmt = var.vcenter.dvs.portgroup.management.prefix
-    ip_mgmt = element(var.vcenter.dvs.portgroup.management.avi_app_ips, count.index)
-    default_gw = var.vcenter.dvs.portgroup.management.gateway
+    prefix = cidrnetmask(var.nsx.config.segments_overlay[1].cidr)
+    ip = cidrhost(var.nsx.config.segments_overlay[1].cidr, var.nsx.config.segments_overlay[count.index].avi_app_server_starting_ip)
+    default_gw = cidrhost(var.nsx.config.segments_overlay[1].cidr, var.nsx.config.segments_overlay[1].gw)
     dns = var.dns.nameserver
     docker_registry_username = var.docker_registry_username
     docker_registry_password = var.docker_registry_password
@@ -19,14 +20,36 @@ data "template_file" "avi_app_userdata" {
   }
 }
 
-resource "vsphere_virtual_machine" "avi_app" {
-  count = (var.avi.app.create == true ? length(var.vcenter.dvs.portgroup.management.avi_app_ips) : 0)
-  name             = "avi_app-${count.index}"
-  datastore_id     = data.vsphere_datastore.datastore_nested[0].id
-  resource_pool_id = data.vsphere_resource_pool.resource_pool_nested_avi_app[0].id
+data "template_file" "avi_app_userdata_segment_2" {
+  count = var.avi.app.count
+  template = file("${path.module}/userdata/avi_app.userdata")
+  vars = {
+    username     = var.avi.app.username
+    hostname     = "${var.avi.app.basename}${count.index}"
+    password      = var.ubuntu_password
+    pubkey       = file(var.avi.app.public_key_path)
+    netplan_file  = var.avi.app.netplan_file
+    prefix = cidrnetmask(var.nsx.config.segments_overlay[2].cidr)
+    ip = cidrhost(var.nsx.config.segments_overlay[2].cidr, var.nsx.config.segments_overlay[count.index].avi_app_server_starting_ip)
+    default_gw = cidrhost(var.nsx.config.segments_overlay[2].cidr, var.nsx.config.segments_overlay[2].gw)
+    dns = var.dns.nameserver
+    docker_registry_username = var.docker_registry_username
+    docker_registry_password = var.docker_registry_password
+    avi_app_docker_image = var.avi.app.avi_app_docker_image
+    avi_app_tcp_port = var.avi.app.avi_app_tcp_port
+    hackazon_docker_image = var.avi.app.hackazon_docker_image
+    hackazon_tcp_port = var.avi.app.hackazon_tcp_port
+  }
+}
+
+resource "vsphere_virtual_machine" "avi_app_segment_1" {
+  count = var.avi.app.count
+  name             = "${var.avi.app.basename}${count.index}"
+  datastore_id     = data.vsphere_datastore.datastore_nested.id
+  resource_pool_id = data.vsphere_resource_pool.resource_pool_nested.id
 
   network_interface {
-    network_id = data.vsphere_network.vcenter_network_mgmt_nested[0].id
+    network_id = data.vsphere_network.vcenter_network_1.id
   }
 
   num_cpus = var.avi.app.cpu
@@ -36,7 +59,7 @@ resource "vsphere_virtual_machine" "avi_app" {
 
   disk {
     size             = var.avi.app.disk
-    label            = "avi_app${count.index}.lab_vmdk"
+    label            = "${var.avi.app.basename}${count.index}.lab_vmdk"
     thin_provisioned = true
   }
 
@@ -45,19 +68,19 @@ resource "vsphere_virtual_machine" "avi_app" {
   }
 
   clone {
-    template_uuid = vsphere_content_library_item.nested_library_item_avi_app[0].id
+    template_uuid = vsphere_content_library_item.nested_library_item_avi_app.id
   }
 
   vapp {
     properties = {
-      hostname    = "avi_app-${count.index}"
+      hostname    = "${var.avi.app.basename}${count.index}"
       public-keys = file(var.avi.app.public_key_path)
-      user-data   = base64encode(data.template_file.avi_app_userdata[count.index].rendered)
+      user-data   = base64encode(data.template_file.avi_app_userdata_segment_1[count.index].rendered)
     }
   }
 
   connection {
-    host        = element(var.vcenter.dvs.portgroup.management.avi_app_ips, count.index)
+    host        = cidrhost(var.nsx.config.segments_overlay[1].cidr, var.nsx.config.segments_overlay[count.index].avi_app_server_starting_ip)
     type        = "ssh"
     agent       = false
     user        = var.avi.app.username
@@ -71,29 +94,45 @@ resource "vsphere_virtual_machine" "avi_app" {
   }
 }
 
-resource "null_resource" "add_nic_avi_app_via_govc" {
-  depends_on = [vsphere_virtual_machine.avi_app]
-  count = (var.avi.app.create == true ? length(var.vcenter.dvs.portgroup.management.avi_app_ips) : 0)
+resource "vsphere_virtual_machine" "avi_app_segment_2" {
+  count = var.avi.app.count
+  name             = "${var.avi.app.basename}${count.index}"
+  datastore_id     = data.vsphere_datastore.datastore_nested.id
+  resource_pool_id = data.vsphere_resource_pool.resource_pool_nested.id
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      export GOVC_USERNAME='administrator@${var.vcenter.sso.domain_name}'
-      export GOVC_PASSWORD=${var.vcenter_password}
-      export GOVC_DATACENTER=${var.vcenter.datacenter}
-      export GOVC_URL=${var.vcenter.name}.${var.dns.domain}
-      export GOVC_CLUSTER=${var.vcenter.cluster}
-      export GOVC_INSECURE=true
-      govc vm.network.add -vm "avi_app-${count.index}" -net ${var.vcenter.dvs.portgroup.avi_backend.name}
-    EOT
+  network_interface {
+    network_id = data.vsphere_network.vcenter_network_2.id
   }
-}
 
-resource "null_resource" "update_ip_avi_app" {
-  depends_on = [null_resource.add_nic_avi_app_via_govc]
-  count = (var.avi.app.create == true ? length(var.vcenter.dvs.portgroup.management.avi_app_ips) : 0)
+  num_cpus = var.avi.app.cpu
+  memory = var.avi.app.memory
+  wait_for_guest_net_timeout = "4"
+  guest_id = "avi_app-${count.index}"
+
+  disk {
+    size             = var.avi.app.disk
+    label            = "${var.avi.app.basename}${count.index}.lab_vmdk"
+    thin_provisioned = true
+  }
+
+  cdrom {
+    client_device = true
+  }
+
+  clone {
+    template_uuid = vsphere_content_library_item.nested_library_item_avi_app.id
+  }
+
+  vapp {
+    properties = {
+      hostname    = "${var.avi.app.basename}${count.index}"
+      public-keys = file(var.avi.app.public_key_path)
+      user-data   = base64encode(data.template_file.avi_app_userdata_segment_1[count.index].rendered)
+    }
+  }
 
   connection {
-    host        = element(var.vcenter.dvs.portgroup.management.avi_app_ips, count.index)
+    host        = cidrhost(var.nsx.config.segments_overlay[2].cidr, var.nsx.config.segments_overlay[count.index].avi_app_server_starting_ip)
     type        = "ssh"
     agent       = false
     user        = var.avi.app.username
@@ -101,32 +140,8 @@ resource "null_resource" "update_ip_avi_app" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "ifaceFirstName=`ip -o link show | awk -F': ' '{print $2}' | head -2 | tail -1`",
-      "macFirst=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -2 | tail -1`",
-      "ifaceLastName=`ip -o link show | awk -F': ' '{print $2}' | tail -1`",
-      "macLast=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}'| tail -1`",
-      "sudo cp ${var.avi.app.netplan_file} ${var.avi.app.netplan_file}.old",
-      "echo \"network:\" | sudo tee ${var.avi.app.netplan_file}",
-      "echo \"    ethernets:\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"        $ifaceFirstName:\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            dhcp4: false\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            addresses: [${element(var.vcenter.dvs.portgroup.management.avi_app_ips, count.index)}/${var.vcenter.dvs.portgroup.management.prefix}]\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            match:\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"                macaddress: $macFirst\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            set-name: $ifaceFirstName\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            gateway4: ${var.vcenter.dvs.portgroup.management.gateway}\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            nameservers:\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"              addresses: [${var.dns.nameserver}]\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"        $ifaceLastName:\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            dhcp4: false\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            addresses: [${element(var.vcenter.dvs.portgroup.avi_backend.avi_app_ips, count.index)}/${var.vcenter.dvs.portgroup.avi_mgmt.prefix}]\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            match:\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"                macaddress: $macLast\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"            set-name: $ifaceLastName\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "echo \"    version: 2\" | sudo tee -a ${var.avi.app.netplan_file}",
-      "sudo netplan apply",
-      "echo -e \"Hello World - cloud is vCenter - Node is ${element(var.vcenter.dvs.portgroup.avi_backend.avi_app_ips, count.index)}\" | sudo tee /var/www/html/index.html"
+    inline      = [
+      "while [ ! -f /tmp/cloudInitDone.log ]; do sleep 1; done"
     ]
   }
 }
