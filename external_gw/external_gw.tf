@@ -142,7 +142,7 @@ resource "null_resource" "add_nic_to_gw_network_nsx_overlay_edge" {
   }
 }
 
-resource "null_resource" "update_ip_external_gw" {
+resource "null_resource" "update_ip_external_gw_1" {
   depends_on = [null_resource.add_nic_to_gw_network_nsx_external, null_resource.add_nic_to_gw_network_nsx_overlay, null_resource.add_nic_to_gw_network_nsx_overlay_edge]
   count = (var.external_gw.create == true ? 1 : 0)
 
@@ -181,8 +181,50 @@ resource "null_resource" "update_ip_external_gw" {
       "echo \"            dhcp4: false\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            addresses: [${var.vcenter.dvs.portgroup.nsx_external.external_gw_ip}/${var.vcenter.dvs.portgroup.nsx_external.prefix}]\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            routes:\" | sudo tee -a ${var.external_gw.netplanFile}",
-      "echo \"            - to: ${var.external_gw.routes.to}\" | sudo tee -a ${var.external_gw.netplanFile}",
-      "echo \"              via: ${var.external_gw.routes.via}\" | sudo tee -a ${var.external_gw.netplanFile}",
+    ]
+  }
+}
+
+
+
+
+
+resource "null_resource" "update_ip_external_gw_2" {
+  depends_on = [null_resource.update_ip_external_gw_1]
+  count = var.external_gw.create == true ? length(var.external_gw.routes) : 0
+
+  connection {
+    host        = var.vcenter.dvs.portgroup.management.external_gw_ip
+    type        = "ssh"
+    agent       = false
+    user        = var.external_gw.username
+    private_key = file(var.external_gw.private_key_path)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo \"            - to: ${var.external_gw.routes[count.index].to}\" | sudo tee -a ${var.external_gw.netplanFile}",
+      "echo \"              via: ${var.external_gw.routes[count.index].via}\" | sudo tee -a ${var.external_gw.netplanFile}"
+    ]
+  }
+}
+
+
+
+resource "null_resource" "update_ip_external_gw_3" {
+  depends_on = [null_resource.update_ip_external_gw_2]
+  count = (var.external_gw.create == true ? 1 : 0)
+
+  connection {
+    host        = var.vcenter.dvs.portgroup.management.external_gw_ip
+    type        = "ssh"
+    agent       = false
+    user        = var.external_gw.username
+    private_key = file(var.external_gw.private_key_path)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
       "echo \"            match:\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"                macaddress: $macSecond\" | sudo tee -a ${var.external_gw.netplanFile}",
       "echo \"            set-name: $ifaceSecond\" | sudo tee -a ${var.external_gw.netplanFile}",

@@ -14,6 +14,7 @@ fi
 #
 # Sanity checks
 #
+# check if the amount of external IP is enough for all the interfaces of the tier0
 IFS=$'\n'
 ip_count_external_tier0=$(jq -c -r '.vcenter.dvs.portgroup.nsx_external.tier0_ips | length' $jsonFile)
 tier0_ifaces=0
@@ -23,11 +24,34 @@ do
   tier0_ifaces=$((tier0_ifaces+$(echo $tier0 | jq -c -r '.interfaces | length')))
 done
 if [[ $tier0_ifaces -gt $ip_count_external_tier0 ]] ; then
-  echo "Amount of IPs given for external tier0_ifaces (.vcenter.dvs.portgroup.nsx_external.tier0_ips) cannot cover the amount of tier0_ifaces defined in .nsx.config.tier0s[].interfaces"
+  echo "Amount of IPs (.vcenter.dvs.portgroup.nsx_external.tier0_ips) cannot cover the amount of tier0 interfaces defined in .nsx.config.tier0s[].interfaces"
   exit 255
 fi
-#
-
+# check if the amount of interfaces in vip config is equal to two for each tier0
+for tier0 in $(jq -c -r .nsx.config.tier0s[] $jsonFile)
+do
+  for vip in $(echo $tier0 | jq -c -r .ha_vips[])
+  do
+    if [[ $(echo $vip | jq -c -r '.interfaces | length') -ne 2 ]] ; then
+      echo "Amount of interfaces (.nsx.config.tier0s[].ha_vips[].interfaces) needs to be equal to 2; tier0 called $(echo $tier0 | jq -c -r .display_name) has $(echo $vip | jq -c -r '.interfaces | length') interfaces for its ha_vips"
+      exit 255
+    fi
+  done
+done
+# check if the amount of external vip is enough for all the vips of the tier0s
+vip_count_external_tier0=$(jq -c -r '.vcenter.dvs.portgroup.nsx_external.tier0_vips | length' $jsonFile)
+tier0_vips=0
+for tier0 in $(jq -c -r .nsx.config.tier0s[] $jsonFile)
+do
+  for vip in $(echo $tier0 | jq -c -r .ha_vips[])
+  do
+    tier0_vips=$((tier0_vips+$(echo $tier0 | jq -c -r '.ha_vips | length')))
+  done
+if [[ $tier0_vips -gt $vip_count_external_tier0 ]] ; then
+  echo "Amount of VIPs (.vcenter.dvs.portgroup.nsx_external.tier0_vips) cannot cover the amount of ha_vips defined in .nsx.config.tier0s[].ha_vips"
+  exit 255
+fi
+done
 #
 # Prerequisites to be added
 # govc install
@@ -111,7 +135,10 @@ fi
 #
 # Add Routes to join overlay network
 #
-sudo ip route add $(jq -c -r .external_gw.routes.to $jsonFile) via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
+for route in $(jq -c -r .external_gw.routes[] $jsonFile)
+do
+  sudo ip route add $(echo $route | jq -c -r '.to') via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
+done
 #
 # Build of the Nested Avi Controllers
 #
@@ -148,7 +175,10 @@ fi
 #
 # Remove Routes to join overlay network
 #
-sudo ip route del $(jq -c -r .external_gw.routes.to $jsonFile) via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
+for route in $(jq -c -r .external_gw.routes[] $jsonFile)
+do
+  sudo ip route del $(echo $route | jq -c -r '.to') via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
+done
 #
 # Build of the config of Avi
 #
