@@ -7,6 +7,17 @@ if [ -f "variables.json" ]; then
 else
   exit 1
 fi
+#
+#
+#
+echo "--------------------------------------------------------------------------------------------------------------------"
+#
+# destroying ip route to reach overlay segments
+#
+for route in $(jq -c -r .external_gw.routes[] $jsonFile)
+do
+  sudo ip route del $(echo $route | jq -c -r '.to') via $(jq -c -r .vcenter.dvs.portgroup.management.external_gw_ip $jsonFile)
+done
 echo "--------------------------------------------------------------------------------------------------------------------"
 #
 # Destroy DNS/NTP server on the underlay infrastructure
