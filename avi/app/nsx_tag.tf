@@ -1,5 +1,5 @@
 resource "nsxt_vm_tags" "avi_app_tag" {
-  count = var.avi.app.count
+  count = length(var.nsx.config.segments_overlay[1].avi_app_server_ips)
   instance_id = vsphere_virtual_machine.avi_app[count.index].id
   tag {
     tag   = var.avi.app.nsxt_vm_tags

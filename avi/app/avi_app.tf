@@ -1,5 +1,5 @@
 data "template_file" "avi_app_userdata" {
-  count = var.avi.app.count
+  count = length(var.nsx.config.segments_overlay[1].avi_app_server_ips)
   template = file("${path.module}/userdata/avi_app.userdata")
   vars = {
     username     = var.avi.app.username
@@ -8,7 +8,7 @@ data "template_file" "avi_app_userdata" {
     pubkey       = file(var.avi.app.public_key_path)
     netplan_file  = var.avi.app.netplan_file
     prefix = split("/", var.nsx.config.segments_overlay[1].cidr)[1]
-    ip = cidrhost(var.nsx.config.segments_overlay[1].cidr, var.nsx.config.segments_overlay[1].avi_app_server_starting_ip + count.index)
+    ip = var.nsx.config.segments_overlay[1].avi_app_server_ips[count.index]
     mtu = var.avi.app.mtu
     default_gw = cidrhost(var.nsx.config.segments_overlay[1].cidr, var.nsx.config.segments_overlay[1].gw)
     dns = var.dns.nameserver
@@ -22,7 +22,7 @@ data "template_file" "avi_app_userdata" {
 }
 
 resource "vsphere_virtual_machine" "avi_app" {
-  count = var.avi.app.count
+  count = length(var.nsx.config.segments_overlay[1].avi_app_server_ips)
   name             = "${var.avi.app.basename}${count.index}"
   datastore_id     = data.vsphere_datastore.datastore_nested.id
   resource_pool_id = data.vsphere_resource_pool.resource_pool_nested.id
@@ -59,7 +59,7 @@ resource "vsphere_virtual_machine" "avi_app" {
   }
 
   connection {
-    host        = cidrhost(var.nsx.config.segments_overlay[1].cidr, var.nsx.config.segments_overlay[1].avi_app_server_starting_ip + count.index)
+    host        = var.nsx.config.segments_overlay[1].avi_app_server_ips[count.index]
     type        = "ssh"
     agent       = false
     user        = var.avi.app.username
