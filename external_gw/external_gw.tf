@@ -221,6 +221,7 @@ resource "null_resource" "update_ip_external_gw_3" {
 
   provisioner "remote-exec" {
     inline = [
+      "iface=`ip -o link show | awk -F': ' '{print $2}' | head -2 | tail -1`",
       "ifaceSecond=`ip -o link show | awk -F': ' '{print $2}' | head -3 | tail -1`",
       "macSecond=`ip -o link show | awk -F'link/ether ' '{print $2}' | awk -F' ' '{print $1}' | head -3 | tail -1`",
       "ifaceThird=`ip -o link show | awk -F': ' '{print $2}' | head -4 | tail -1`",
@@ -245,7 +246,10 @@ resource "null_resource" "update_ip_external_gw_3" {
       "echo \"    version: 2\" | sudo tee -a ${var.external_gw.netplanFile}",
       "sudo netplan apply",
       "sudo sysctl -w net.ipv4.ip_forward=1",
-      "echo \"net.ipv4.ip_forward=1\" | sudo tee -a /etc/sysctl.conf"
+      "echo \"net.ipv4.ip_forward=1\" | sudo tee -a /etc/sysctl.conf",
+      "sudo iptables -t nat -A POSTROUTING -o $iface -j MASQUERADE",
+      "sudo iptables -A FORWARD -i $ifaceSecond -o $iface -j ACCEPT",
+      "sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT"
     ]
   }
 }
