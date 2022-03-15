@@ -395,7 +395,7 @@
           "cidr": "100.100.10.0/24",
           "gw": "1",
           "avi_controller": "11",
-          "description": "keep the management segment at the first position - do not remove"
+          "description": "keep the management segment at the first position in the segment_overlay list - do not remove"
         },
         {
           "display_name": "my-segment-server-1",
@@ -403,17 +403,17 @@
           "transport_zone": "tz_overlay",
           "cidr": "100.100.21.0/24",
           "gw": "1",
-          "description": "keep the segment server 1 at the second position - do not remove",
-          "avi_app_server_starting_ip": "11"
+          "description": "keep the segment server 1 at the second position in the segment_overlay list - do not remove",
+          "avi_app_server_starting_ip": 11
         },
         {
           "display_name": "my-segment-server-2",
           "tier1": "my-tier1",
           "transport_zone": "tz_overlay",
           "cidr": "100.100.22.0/24",
-          "avi_app_server_starting_ip": "11",
+          "avi_app_server_starting_ip": 11,
           "gw": "1",
-          "description": "keep the segment server 2 at the second position - do not remove"
+          "description": "keep the segment server 2 at the second position in the segment_overlay list - do not remove"
         },
         {
           "display_name": "my-segment-vip-1",
@@ -421,7 +421,7 @@
           "transport_zone": "tz_overlay",
           "cidr": "100.100.31.0/24",
           "gw": "1",
-          "description": "keep the vip segment 1 at the fourth position"
+          "description": "keep the vip segment 1 at the fourth position in the segment_overlay list - do not remove"
         },
         {
           "display_name": "my-segment-vip-2",
@@ -429,7 +429,7 @@
           "transport_zone": "tz_overlay",
           "cidr": "100.100.32.0/24",
           "gw": "1",
-          "description": "keep the vip segment 2 at the fifth position"
+          "description": "keep the vip segment 2 at the fifth position in the segment_overlay list - do not remove"
         }
       ]
     }
@@ -444,13 +444,16 @@
       "cpu": 8,
       "memory": 24768,
       "disk": 128,
-      "basename": "avi-controller"
+      "basename": "avi-controller",
+      "version": "21.1.1"
     },
     "config": {
-      "create": false
-      },
-    "app": {
       "create": false,
+      "avi_config_repo": "https://github.com/tacobayle/ansibleAviConfig",
+      "avi_config_tag": "v1.09"
+    },
+    "app": {
+      "create": true,
       "basename": "avi-app-",
       "count": 3,
       "description": "this will deploy the same amount of server (count) on each server segment (nsx.config.segments_overlay[1] and nsx.config.segments_overlay[2])",
@@ -462,6 +465,8 @@
       "private_key_path": "~/.ssh/cloudKey",
       "username": "ubuntu",
       "netplan_file": "/etc/netplan/50-cloud-init.yaml",
+      "mtu": 1300,
+      "nsxt_vm_tags": "avi-app-tag",
       "avi_app_docker_image": "tacobayle/avi_app",
       "avi_app_tcp_port": "8080",
       "hackazon_docker_image": "mutzel/all-in-one-hackazon:postinstall",

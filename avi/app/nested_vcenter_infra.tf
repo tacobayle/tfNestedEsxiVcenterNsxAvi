@@ -18,12 +18,7 @@ data "vsphere_resource_pool" "resource_pool_nested" {
   datacenter_id = data.vsphere_datacenter.dc_nested.id
 }
 
-data "vsphere_network" "vcenter_network_1" {
+data "vsphere_network" "vcenter_network" {
   name = var.nsx.config.segments_overlay[1].display_name
-  datacenter_id = data.vsphere_datacenter.dc_nested.id
-}
-
-data "vsphere_network" "vcenter_network_2" {
-  name = var.nsx.config.segments_overlay[2].display_name
   datacenter_id = data.vsphere_datacenter.dc_nested.id
 }
