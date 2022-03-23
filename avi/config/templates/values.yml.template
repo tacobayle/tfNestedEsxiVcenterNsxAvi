@@ -1,0 +1,34 @@
+---
+avi_version: ${avi_version}
+controllerPrivateIps:
+  - ${controllerPrivateIp}
+avi_old_password: ${avi_old_password}
+avi_password: ${avi_password}
+avi_username: ${avi_username}
+controller:
+  aviCredsJsonFile: ~/.creds.json
+  environment: vCenter
+  cluster: false
+  ntp:
+    - ${ntp}
+  dns:
+    - ${dns}
+nsx_username: admin
+nsx_password: ${nsx_password}
+nsx_server: ${nsx_server}
+nsxt:
+  name: dc1_nsxt
+  domains:
+    - name: ${domain}
+  transport_zone:
+    name: ${transport_zone_name}
+  network_management: ${network_management}
+  networks_data: |
+    ${networks_data}
+  networks_backend: |
+    ${networks_backend}
+  vcenter_details:
+    - username: administrator@${sso_domain}
+      password: ${vcenter_password}
+      vsphere_server: ${vcenter_ip}
+      content_library: ${content_library}

@@ -187,7 +187,7 @@
         "nsx_external": {
           "name": "nsx-external-vds",
           "vlan": 200,
-          "max_mtu": 1600,
+          "max_mtu": 1700,
           "netmask": "255.255.255.0",
           "prefix": "24",
           "external_gw_ip": "172.16.100.100",
@@ -382,7 +382,12 @@
       [
         {
           "tier0": "my-tier0",
-          "display_name": "my-tier1",
+          "display_name": "my-tier1-A",
+          "route_advertisement_types": ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED", "TIER1_LB_VIP"]
+        },
+        {
+          "tier0": "my-tier0",
+          "display_name": "my-tier1-B",
           "route_advertisement_types": ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED", "TIER1_LB_VIP"]
         }
       ],
@@ -390,7 +395,7 @@
       [
         {
           "display_name": "my-segment-mgmt",
-          "tier1": "my-tier1",
+          "tier1": "my-tier1-A",
           "transport_zone": "tz_overlay",
           "cidr": "100.100.11.0/24",
           "gw": "1",
@@ -399,7 +404,7 @@
         },
         {
           "display_name": "my-segment-server-1",
-          "tier1": "my-tier1",
+          "tier1": "my-tier1-A",
           "transport_zone": "tz_overlay",
           "cidr": "100.100.21.0/24",
           "gw": "1",
@@ -408,7 +413,7 @@
         },
         {
           "display_name": "my-segment-server-2",
-          "tier1": "my-tier1",
+          "tier1": "my-tier1-A",
           "transport_zone": "tz_overlay",
           "cidr": "100.100.22.0/24",
           "gw": "1",
@@ -416,7 +421,7 @@
         },
         {
           "display_name": "my-segment-vip-1",
-          "tier1": "my-tier1",
+          "tier1": "my-tier1-A",
           "transport_zone": "tz_overlay",
           "cidr": "100.100.31.0/24",
           "gw": "1",
@@ -424,7 +429,7 @@
         },
         {
           "display_name": "my-segment-vip-2",
-          "tier1": "my-tier1",
+          "tier1": "my-tier1-B",
           "transport_zone": "tz_overlay",
           "cidr": "100.100.32.0/24",
           "gw": "1",
@@ -449,32 +454,34 @@
     "config": {
       "create": false,
       "transport_zone_name": "tz_overlay",
+      "content_library_avi": "avi_cl",
       "network_management": {
         "name": "my-segment-mgmt",
-        "tier1": "my-tier1"
+        "tier1": "my-tier1-A",
+        "avi_ipam_pool": "100.100.11.210-100.100.11.230"
       },
       "networks_data": [
         {
           "name": "my-segment-vip-1",
-          "tier1": "my-tier1"
+          "tier1": "my-tier1-A"
         },
         {
           "name": "my-segment-vip-2",
-          "tier1": "my-tier1"
+          "tier1": "my-tier1-B"
         }
       ],
-      "network_backend": [
+      "networks_backend": [
         {
           "name": "my-segment-server-1",
-          "tier1": "my-tier1"
+          "tier1": "my-tier1-A"
         },
         {
           "name": "my-segment-server-2",
-          "tier1": "my-tier1"
+          "tier1": "my-tier1-A"
         }
       ],
       "avi_config_repo": "https://github.com/tacobayle/ansibleAviConfig",
-      "avi_config_tag": "v1.09"
+      "avi_config_tag": "v1.16"
     },
     "app": {
       "create": true,
