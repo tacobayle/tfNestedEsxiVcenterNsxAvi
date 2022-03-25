@@ -548,7 +548,7 @@
         }
       ],
       "avi_config_repo": "https://github.com/tacobayle/ansibleAviConfig",
-      "avi_config_tag": "v1.16"
+      "avi_config_tag": "v1.28"
     },
     "app": {
       "create": true,
