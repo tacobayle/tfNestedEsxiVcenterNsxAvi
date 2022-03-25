@@ -7,7 +7,7 @@ resource "nsxt_vm_tags" "avi_app_tag" {
 }
 
 resource "nsxt_policy_group" "backend" {
-  display_name = "avi-app"
+  display_name = var.avi.app.nsxt_group_name
 
   criteria {
     condition {
