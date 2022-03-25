@@ -32,6 +32,7 @@ data "template_file" "values" {
     vcenter_password = var.vcenter_password
     vcenter_ip = var.vcenter.dvs.portgroup.management.vcenter_ip
     content_library = var.avi.config.content_library_avi
+    service_engine_groups = jsonencode(var.avi.config.service_engine_groups)
   }
 }
 

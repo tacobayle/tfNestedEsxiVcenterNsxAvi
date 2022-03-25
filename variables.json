@@ -454,20 +454,87 @@
     "config": {
       "create": false,
       "transport_zone_name": "tz_overlay",
-      "content_library_avi": "avi_cl",
+      "content_library_avi": "avi_cloud_nsx",
       "network_management": {
         "name": "my-segment-mgmt",
         "tier1": "my-tier1-A",
-        "avi_ipam_pool": "100.100.11.210-100.100.11.230"
+        "avi_ipam_pool_se": "100.100.11.210-100.100.11.230",
+        "description": "the following keys are required: name, tier1, avi_ipam_pool"
       },
       "networks_data": [
         {
           "name": "my-segment-vip-1",
-          "tier1": "my-tier1-A"
+          "tier1": "my-tier1-A",
+          "avi_ipam_pool_se": "100.100.31.210-100.100.31.230",
+          "description": "the following keys are required: name, tier1, avi_ipam_pool",
+          "avi_ipam_vip": {
+            "cidr": "100.100.131.0/24",
+            "pool": "100.100.131.210-100.100.131.230"
+          }
         },
         {
           "name": "my-segment-vip-2",
-          "tier1": "my-tier1-B"
+          "tier1": "my-tier1-B",
+          "avi_ipam_pool_se": "100.100.32.210-100.100.32.230",
+          "description": "the following keys are required: name, tier1, avi_ipam_pool",
+          "avi_ipam_vip": {
+            "cidr": "100.100.132.0/24",
+            "pool": "100.100.132.210-100.100.132.230"
+          }
+        }
+      ],
+      "service_engine_groups": [
+        {
+          "name": "Default-Group",
+          "ha_mode": "HA_MODE_SHARED_PAIR",
+          "min_scaleout_per_vs": 2,
+          "buffer_se": 0,
+          "extra_shared_config_memory": 0,
+          "vcenter_folder": "Avi-SE-Default-Group",
+          "vcpus_per_se": 1,
+          "memory_per_se": 1024,
+          "disk_per_se": 25,
+          "realtime_se_metrics": {
+            "enabled": true,
+            "duration": 0
+          }
+        },
+        {
+          "name": "seGroupCpuAutoScale",
+          "ha_mode": "HA_MODE_SHARED",
+          "min_scaleout_per_vs": 1,
+          "max_scaleout_per_vs": 2,
+          "max_cpu_usage": 70,
+          "buffer_se": 0,
+          "extra_shared_config_memory": 0,
+          "vcenter_folder": "Avi-SE-Autoscale",
+          "vcpus_per_se": 1,
+          "memory_per_se": 1024,
+          "disk_per_se": 25,
+          "auto_rebalance": true,
+          "auto_rebalance_interval": 30,
+          "auto_rebalance_criteria": [
+            "SE_AUTO_REBALANCE_CPU"
+          ],
+          "realtime_se_metrics": {
+            "enabled": true,
+            "duration": 0
+          }
+        },
+        {
+          "name": "seGroupGslb",
+          "ha_mode": "HA_MODE_SHARED",
+          "min_scaleout_per_vs": 1,
+          "buffer_se": 0,
+          "extra_shared_config_memory": 0,
+          "vcenter_folder": "Avi-SE-GSLB",
+          "vcpus_per_se": 1,
+          "memory_per_se": 1024,
+          "disk_per_se": 25,
+          "realtime_se_metrics": {
+            "enabled": true,
+            "duration": 0
+          }
         }
       ],
       "networks_backend": [

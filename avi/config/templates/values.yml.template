@@ -27,8 +27,10 @@ nsxt:
     ${networks_data}
   networks_backend: |
     ${networks_backend}
-  vcenter_details:
+  vcenters_details:
     - username: administrator@${sso_domain}
       password: ${vcenter_password}
       vsphere_server: ${vcenter_ip}
       content_library: ${content_library}
+  service_engine_groups: |
+    ${service_engine_groups}
