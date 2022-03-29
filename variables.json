@@ -452,7 +452,9 @@
       "version": "21.1.3"
     },
     "config": {
-      "create": false,
+      "create": true,
+      "avi_config_repo": "https://github.com/tacobayle/ansibleAviConfig",
+      "avi_config_tag": "v1.3",
       "transport_zone_name": "tz_overlay",
       "content_library_avi": "avi_cloud_nsx",
       "network_management": {
@@ -537,18 +539,139 @@
           }
         }
       ],
-      "networks_backend": [
+      "pools": [
         {
-          "name": "my-segment-server-1",
-          "tier1": "my-tier1-A"
+          "name": "pool1-hello-nsxt",
+          "tier1": "my-tier1-A",
+          "lb_algorithm": "LB_ALGORITHM_ROUND_ROBIN",
+          "default_server_port": 80,
+          "type": "ip-based",
+          "avi_app_server_ips": ["100.100.21.11", "100.100.21.12", "100.100.21.13"]
         },
         {
-          "name": "my-segment-server-2",
-          "tier1": "my-tier1-A"
+          "name": "pool2-avi-nsxt",
+          "tier1": "my-tier1-A",
+          "application_persistence_profile_ref": "System-Persistence-Client-IP",
+          "default_server_port": 8080,
+          "type": "ip-based",
+          "avi_app_server_ips": ["100.100.21.11", "100.100.21.12", "100.100.21.13"]
+        },
+        {
+          "name": "pool3-waf",
+          "tier1": "my-tier1-A",
+          "application_persistence_profile_ref": "System-Persistence-Client-IP",
+          "default_server_port": 8081,
+          "type": "ip-based",
+          "avi_app_server_ips": ["100.100.21.11", "100.100.21.12", "100.100.21.13"]
+        },
+        {
+          "name": "avi-app-nsx-group",
+          "tier1": "my-tier1-A",
+          "default_server_port": 80,
+          "type": "nsx-group-based"
         }
       ],
-      "avi_config_repo": "https://github.com/tacobayle/ansibleAviConfig",
-      "avi_config_tag": "v1.28"
+      "virtual_services": {
+        "http": [
+          {
+            "name": "app1-hello-world-nsxt",
+            "network_ref": "my-segment-vip-1",
+            "pool_ref": "pool1-hello-nsxt",
+            "services": [
+              {
+                "port": 80,
+                "enable_ssl": "false"
+              },
+              {
+                "port": 443,
+                "enable_ssl": "true"
+              }
+            ]
+          },
+          {
+            "name": "app2-avi-nsxt",
+            "network_ref": "my-segment-vip-1",
+            "pool_ref": "pool2-avi-nsxt",
+            "services": [
+              {
+                "port": 80,
+                "enable_ssl": "false"
+              },
+              {
+                "port": 443,
+                "enable_ssl": "true"
+              }
+            ]
+          },
+          {
+            "name": "app3-waf",
+            "network_ref": "my-segment-vip-1",
+            "pool_ref": "pool3-waf",
+            "services": [
+              {
+                "port": 80,
+                "enable_ssl": "false"
+              },
+              {
+                "port": 443,
+                "enable_ssl": "true"
+              }
+            ]
+          },
+          {
+            "name": "app4-se-cpu-auto-scale",
+            "network_ref": "my-segment-vip-1",
+            "pool_ref": "pool1-hello-nsxt",
+            "services": [
+              {
+                "port": 80,
+                "enable_ssl": "false"
+              },
+              {
+                "port": 443,
+                "enable_ssl": "true"
+              }
+            ],
+            "se_group_ref": "seGroupCpuAutoScale"
+          },
+          {
+            "name": "app5-hello-world-nsxt-group",
+            "network_ref": "my-segment-vip-1",
+            "pool_ref": "avi-app-nsx-group",
+            "services": [
+              {
+                "port": 80,
+                "enable_ssl": "false"
+              },
+              {
+                "port": 443,
+                "enable_ssl": "true"
+              }
+            ]
+          }
+        ],
+        "dns": [
+          {
+            "name": "app6-dns",
+            "network_ref": "my-segment-vip-2",
+            "services": [
+              {
+                "port": 53
+              }
+            ]
+          },
+          {
+            "name": "app7-gslb",
+            "network_ref": "my-segment-vip-2",
+            "services": [
+              {
+                "port": 53
+              }
+            ],
+            "se_group_ref": "seGroupGslb"
+          }
+        ]
+      }
     },
     "app": {
       "create": true,
@@ -567,6 +690,7 @@
       "nsxt_vm_tags": "avi-app-tag",
       "nsxt_group_name": "avi-app-nsx-group",
       "avi_app_docker_image": "tacobayle/avi_app",
+      "hello_world_app_tcp_port": "80",
       "avi_app_tcp_port": "8080",
       "hackazon_docker_image": "mutzel/all-in-one-hackazon:postinstall",
       "hackazon_tcp_port": "8081"

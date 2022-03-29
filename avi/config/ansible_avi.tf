@@ -27,12 +27,13 @@ data "template_file" "values" {
     transport_zone_name = var.avi.config.transport_zone_name
     network_management = jsonencode(var.avi.config.network_management)
     networks_data = jsonencode(var.avi.config.networks_data)
-    networks_backend = jsonencode(var.avi.config.networks_backend)
     sso_domain = var.vcenter.sso.domain_name
     vcenter_password = var.vcenter_password
     vcenter_ip = var.vcenter.dvs.portgroup.management.vcenter_ip
     content_library = var.avi.config.content_library_avi
     service_engine_groups = jsonencode(var.avi.config.service_engine_groups)
+    pools = jsonencode(var.avi.config.pools)
+    virtual_services = jsonencode(var.avi.config.virtual_services)
   }
 }
 

@@ -25,8 +25,6 @@ nsxt:
   network_management: ${network_management}
   networks_data: |
     ${networks_data}
-  networks_backend: |
-    ${networks_backend}
   vcenters_details:
     - username: administrator@${sso_domain}
       password: ${vcenter_password}
@@ -34,3 +32,7 @@ nsxt:
       content_library: ${content_library}
   service_engine_groups: |
     ${service_engine_groups}
+  pools: |
+    ${pools}
+  virtual_services: |
+    ${virtual_services}

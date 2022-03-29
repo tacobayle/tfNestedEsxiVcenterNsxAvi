@@ -1,10 +1,16 @@
-
+resource "vsphere_folder" "avi" {
+  count            = var.avi.controller.create == true ? 1 : 0
+  path          = "avi-controllers"
+  type          = "vm"
+  datacenter_id = data.vsphere_datacenter.dc_nested[0].id
+}
 
 resource "vsphere_virtual_machine" "controller" {
   count = var.avi.controller.create == true ? 1 : 0
   name             = "${var.avi.controller.basename}-${count.index + 1}"
   datastore_id     = data.vsphere_datastore.datastore_nested[0].id
   resource_pool_id = data.vsphere_resource_pool.resource_pool_nested[0].id
+  folder           = vsphere_folder.avi[0].path
 
   network_interface {
     network_id = data.vsphere_network.vcenter_network_mgmt_nested[0].id
