@@ -51,7 +51,7 @@ echo "--------------------------------------------------------------------------
 # Destroy of a folder on the underlay infrastructure
 #
 echo "--------------------------------------------------------------------------------------------------------------------"
-echo "Build of a folder on the underlay infrastructure"
+echo "Destroy of a folder on the underlay infrastructure"
 cd vsphere_underlay_folder
 terraform init
 terraform destroy -auto-approve -var-file=../$jsonFile
