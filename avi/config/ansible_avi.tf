@@ -24,6 +24,8 @@ data "template_file" "values" {
     nsx_password = var.nsx_password
     nsx_server = var.vcenter.dvs.portgroup.management.nsx_ip
     domain = var.dns.domain
+    cloud_name = var.avi.config.cloud.name
+    cloud_obj_name_prefix = var.avi.config.cloud.obj_name_prefix
     transport_zone_name = var.avi.config.transport_zone_name
     network_management = jsonencode(var.avi.config.network_management)
     networks_data = jsonencode(var.avi.config.networks_data)
@@ -62,7 +64,7 @@ resource "null_resource" "ansible_avi" {
     inline = [
       "git clone ${var.avi.config.avi_config_repo} --branch ${var.avi.config.avi_config_tag}",
       "cd ${split("/", var.avi.config.avi_config_repo)[4]}",
-      "ansible-playbook -i ../hosts_avi local.yml --extra-vars @../values.yml"
+      "ansible-playbook -i ../hosts_avi nsx.yml --extra-vars @../values.yml"
 //      "ansible-playbook -i ../hosts_avi local.yml --extra-vars '{\"avi_version\": ${jsonencode(var.avi.controller.version)}, \"controllerPrivateIps\": [${cidrhost(var.nsx.config.segments_overlay[0].cidr, var.nsx.config.segments_overlay[0].avi_controller)}], \"avi_old_password\": ${jsonencode(var.avi_old_password)}, \"avi_password\": ${jsonencode(var.avi_password)}, \"avi_username\": ${jsonencode(var.avi_username)}, \"controller\": {\"aviCredsJsonFile\": \"~/.creds.json\", \"environment\": \"vCenter\", \"cluster\": false, \"ntp\": [${jsonencode(var.ntp.server)}], \"dns\": [${jsonencode(var.dns.nameserver)}]}, \"nsx_username\": \"admin\", \"nsx_password\": ${jsonencode(var.nsx_password)}, \"nsx_server\": ${jsonencode(var.vcenter.dvs.portgroup.management.nsx_ip)}, \"nsxt\": {\"name\": \"dc1_nsxt\", \"domains\": [{\"name\": ${jsonencode(var.dns.domain)}}], \"transport_zone\": {\"name\": ${jsonencode(var.avi.config.transport_zone_name)} }, \"network_management\": ${jsonencode(var.avi.config.network_management)}, \"networks_data\": ${jsonencode(var.avi.config.networks_data)}, \"networks_backend\": ${jsonencode(var.avi.config.networks_backend)} }, \"vcenter_credentials\": [{\"username\": \"administrator@${var.vcenter.sso.domain_name}\", \"password\": ${jsonencode(var.vcenter_password)}}]}'"
     ]
   }

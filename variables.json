@@ -454,9 +454,13 @@
     "config": {
       "create": true,
       "avi_config_repo": "https://github.com/tacobayle/ansibleAviConfig",
-      "avi_config_tag": "v1.3",
+      "avi_config_tag": "v1.31",
       "transport_zone_name": "tz_overlay",
       "content_library_avi": "avi_cloud_nsx",
+      "cloud": {
+        "name": "dc1_nsxt",
+        "obj_name_prefix": "AVICTRL"
+      },
       "network_management": {
         "name": "my-segment-mgmt",
         "tier1": "my-tier1-A",
