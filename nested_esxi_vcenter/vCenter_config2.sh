@@ -78,7 +78,7 @@ do
   if [[ $count -ne 0 ]] ; then
     export GOVC_URL=$ip
     echo "make sure vmk2 is tagged with service VSAN"
-    govc host.esxcli network ip interface tag add -i vmk2 -t  || true
+    govc host.esxcli network ip interface tag add -i vmk2 -t VSAN || true
     echo "Adding host $ip in VSAN configuration"
     govc host.esxcli vsan storage tag add -t capacityFlash -d "$(jq -r .vcenter.capacity_disk $jsonFile)"
     govc host.esxcli vsan storage add --disks "$(jq -r .vcenter.capacity_disk $jsonFile)" -s "$(jq -r .vcenter.cache_disk $jsonFile)"
