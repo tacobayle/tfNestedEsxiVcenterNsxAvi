@@ -88,7 +88,9 @@ resource "null_resource" "migrating_vmk0" {
       "esxcli network ip interface tag add -i vmk0 -t Management",
       "esxcli network ip interface set -m 1500 -i vmk0",
       "esxcli network ip interface set -m ${var.vcenter.dvs.mtu} -i vmk1",
-      "esxcli network ip interface set -m ${var.vcenter.dvs.mtu} -i vmk2"
+      "esxcli network ip interface set -m ${var.vcenter.dvs.mtu} -i vmk2",
+      "esxcli network ip interface tag add -i vmk1 -t VMotion",
+      "esxcli network ip interface tag add -i vmk2 -t VSAN"
     ]
   }
 }
